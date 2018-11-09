@@ -13,13 +13,18 @@ void setup() {
 }
 
 void loop() {
-  for (char yPos = 0; yPos < 8; yPos++) {
-    for (char xPos = 0; xPos < 48; xPos++) {
+//  for (char yPos = 0; yPos < 8; yPos++) {
+//    for (char xPos = 0; xPos < 48; xPos++) {
+//      digitalWrite(latchPin, HIGH);
+//      displayPixel(xPos, yPos);
+//      digitalWrite(latchPin, LOW);
+//    }
+//  }
       digitalWrite(latchPin, HIGH);
-      displayPixel(xPos, yPos);
-      digitalWrite(latchPin, LOW);
-    }
-  }
+
+ displayPixel(1, 4);
+       digitalWrite(latchPin, LOW);
+
 }
 
 void displayPixel(char x, char y) { //{x,y} {0-47, 0-7}
@@ -28,7 +33,7 @@ void displayPixel(char x, char y) { //{x,y} {0-47, 0-7}
     if (x > 7) {
       runs++;
       x -= 8;
-      shiftOut(dataPin, clockPin, LSBFIRST, 0b00000000);
+      shiftOut(dataPin, clockPin, LSBFIRST, 0);
     }
     else break;
   }
@@ -36,7 +41,7 @@ void displayPixel(char x, char y) { //{x,y} {0-47, 0-7}
   shiftOut(dataPin, clockPin, LSBFIRST, reversedBitPos[y]);
 
   for (int i = 0; i < (5 - runs); i++) {
-    shiftOut(dataPin, clockPin, LSBFIRST, 0b00000000);
+    shiftOut(dataPin, clockPin, LSBFIRST, 0);
   }
   shiftOut(dataPin, clockPin, LSBFIRST, invertedBitPos[x]);
 }
