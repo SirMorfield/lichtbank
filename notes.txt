@@ -1,0 +1,50 @@
+uno:
+SRAM    2k bytes
+Flash   32k bytes, .5kb naar bootloader
+
+Na bootloader en sketch exclusief pixel data:
+
+SRAM    2048 - 11 = 2037 bytes
+Flash   32768 - 948 - 5120 = 31308 bytes
+
+Met de huidige opstelling gebruikt de arduino per pixel 1 byte SRAM.
+Ik kan de variables in zowel de Flash als de SRAM(standaard) opslaan.
+
+Het display is 48x72 dus,
+1 frame =  48 * 72 = 3456 bytes.
+SRAM    2037/3456 = 0.5894097222222222 frames
+Flash   31308/3456 = 9.059027777777779 frames
+
+-----------
+
+Nogal teleurstellend tot nu toe.
+Eerst de makkelijkste oplossing.
+Een mega gebruiken:
+
+SRAM    8k bytes
+Flash   256k bytes, 8kb naar bootloader
+
+Flash   262144 - 948 - 8192 = 253004 bytes
+SRAM    8192 - 11 = 8181 bytes
+
+1 frame =  48 * 72 = 3456 bytes.
+
+SRAM    8181/3456 = 2.3671875 frames
+Flash   31308/3456 = 73.20717592592592 frames
+
+-----------
+
+Het begint al ergens op te lijken.
+Nu de wat moeilijkere oplossing: frames efficiënter opslaan.
+In paats van een byte een bit gebruiken om een pixel op te slaan.
+Met een beetje geluk kan er 8 keer zoveel opgeslagen worden.
+
+SRAM   2.3671875 * 8 = 18.9375 frames
+Flash  73.20717592592592 * 8 = 585.6574074074074 frames
+
+Met Flash-manier kan je een 24fps gif laten zien van 85.6574074074074 / 24 = 24.402391975308642 seconden
+
+-----------
+
+Het is eventueel ook mogenlijk om een of meerdere externe i2c EEPROM's te gebruiken.
+Zoals de AT24C256 (256KiB!)
