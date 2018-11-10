@@ -41,11 +41,10 @@ void loop() {
         for (int y2 = 0; y2 <= 7; y2++) {
           digitalWrite(clockPin, LOW);
           int res = pgm_read_word_near(&frame1[y2 + block][x + y]);
-          digitalWrite(data1Pin, !res); //This is where the magic happens
+          digitalWrite(data1Pin, res); //This is where the magic happens
           digitalWrite(clockPin, HIGH);
         }
       }
-
       for (int i = 7; i >= 0; i--) {
         if (i == y) {
           digitalWrite(clockPin, LOW);

@@ -1,0 +1,11 @@
+{
+  "apps": [
+    {
+      "name": "lichtbank",
+      "script": "./app.js",
+      "watch": true,
+      "exec_mode": "fork",
+      "max_restarts": 1000
+    }
+  ]
+}

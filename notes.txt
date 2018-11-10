@@ -48,3 +48,12 @@ Met Flash-manier kan je een 24fps gif laten zien van 85.6574074074074 / 24 = 24.
 
 Het is eventueel ook mogenlijk om een of meerdere externe i2c EEPROM's te gebruiken.
 Zoals de AT24C256 (256KiB!)
+
+-----------
+
+De code(https://github.com/SirMorfield/lichtbank/blob/master/main/main.ino) werkt nu helemaal, het moet alleen geoptimaliseerd worden.
+Met 2*6 matrixen kan ik al een lichte flikkering zien.
+Het main bestand valt nog te lezen, maar zodra ik de code ga optimalizeren is dat niet meer het geval.
+Het opslaan van 8 bits in een byte is ook erg moeilijk te lezen, daarom maak ik een nieuw bestand om dezelfde code als main.ino te herschrijven naar een snel.ino met:
+- Meer efficiëntie
+- "8 bits in een byte stoppen" voor de bovengenoemde 8 meer opslag.

@@ -1,0 +1,29 @@
+{
+  "name": "lichtbank",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "dependencies": {
+    "avrgirl-arduino": "^3.0.0",
+    "express": "^4.16.4",
+    "nodemon": "^1.18.6",
+    "npm": "^6.4.1",
+    "serialport": "^7.0.2",
+    "socket.io": "^2.1.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "debug": "nodemon ./app.js --config configs/nodemon.json",
+    "production": "NODE_ENV=production pm2 start ./configs/app.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SirMorfield/lichtbank.git"
+  },
+  "author": "Joppe Koers",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SirMorfield/lichtbank/issues"
+  },
+  "homepage": "https://github.com/SirMorfield/lichtbank#readme"
+}

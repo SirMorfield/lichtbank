@@ -1,7 +1,14 @@
-const scale = 13
-const xSize = 48 * scale
-const ySize = 72 * scale
+const scale = 13;
+const Ypix = 72;
+const Xpix = 48;
+const xSize = Xpix * scale;
+const ySize = Ypix * scale;
 const pixSize = xSize / 48;
+
+const socket = io();
+
+const resetAll = () => location.reload()
+
 const arr = [
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -76,7 +83,7 @@ const arr = [
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 ]
-const res = () => {
+const parseFrame = () => {
   let a = 'bool frame1 = ';
   a += JSON.stringify(arr)
   a = a.replace(/\[/g, '{');
@@ -84,10 +91,12 @@ const res = () => {
   return a;
 }
 
+const exportFrame = () => {
+  socket.emit('frame', parseFrame());
+}
+
 function setup() {
   createCanvas(xSize + 1, ySize + 1);
-  // background(230);
-  // rectMode(CENTER);
   for (let i = 0; i <= xSize; i += pixSize) {
     line(i, 0, i, ySize);
   }
