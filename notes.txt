@@ -57,3 +57,5 @@ Het main bestand valt nog te lezen, maar zodra ik de code ga optimalizeren is da
 Het opslaan van 8 bits in een byte is ook erg moeilijk te lezen, daarom maak ik een nieuw bestand om dezelfde code als main.ino te herschrijven naar een snel.ino met:
 - Meer efficiëntie
 - "8 bits in een byte stoppen" voor de bovengenoemde 8 meer opslag.
+
+arduino --board arduino:avr:uno --port 'cu.usbmodemFA*' --upload /home/user1/lichtbank/arduino/Blink/Blink.ino
