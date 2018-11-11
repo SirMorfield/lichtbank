@@ -58,4 +58,10 @@ Het opslaan van 8 bits in een byte is ook erg moeilijk te lezen, daarom maak ik 
 - Meer efficiëntie
 - "8 bits in een byte stoppen" voor de bovengenoemde 8 meer opslag.
 
-arduino --board arduino:avr:uno --port 'cu.usbmodemFA*' --upload /home/user1/lichtbank/arduino/Blink/Blink.ino
+-----------
+-----------
+
+TODO:
+- test preformance operating system
+- remove express
+- keep libary of sketches created by users

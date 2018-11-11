@@ -29,10 +29,10 @@ const arr = [
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 ]
 const parseFrame = () => {
-  let a = 'bool frame1 = ';
-  a += JSON.stringify(arr)
-  a = a.replace(/\[/g, '{');
-  a = a.replace(/\]/g, '}');
+  let a = `const PROGMEM int frame1[${Ypix}][${Xpix}] = `;
+  a += JSON.stringify(arr).replace(/\[/g, '{').replace(/\]/g, '}')
+  a += ';'
+  console.log(a);
   return a;
 }
 
@@ -61,12 +61,11 @@ function draw() {
       let y = Math.floor(mouseY / scale);
       if (
         y >= 0 &&
-        y <= 72 &&
+        y < Ypix &&
         x >= 0 &&
-        x <= 47
+        x < Xpix
       ) {
         if (x != prevX || y !== prevY) {
-          console.log(x, y);
           prevX = x;
           prevY = y;
 
