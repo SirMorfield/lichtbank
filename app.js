@@ -12,7 +12,7 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, './public/index.html'))
 });
 
-io.on('connection', (socket) => {
+io.on('connection', socket => {
   console.log('a user connected');
   socket.on('frame', (frame) => {
     let sketch = frame + sketchWithoutPixelData;
