@@ -10,8 +10,6 @@ stations.json
 package-lock.json
 *.pem
 .git
-test.json
 temp.json
-test.js
 temp.js
 .vscode/
