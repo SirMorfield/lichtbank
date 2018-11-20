@@ -11,7 +11,10 @@ let pixel = 1;
 var p5 = new p5();
 let newFrame = false;
 let fillGridWithPixels = false;
-
+let fillGridWithPixelsLocation = 0;
+let clearCanvas = false;
+let updateFramePos = false;
+let animation;
 const emptyframeArray = () => {
   let arr = [];
   for (let i = 0; i < Ypix; i++) arr.push(new Array(Xpix).fill(0)) //filling frame array with 0s
@@ -31,7 +34,6 @@ const exportFrame = () => {
 const makeButtonBold = (button) => {
   Array.from(document.getElementsByClassName('pixel'))[button].id = "bold"
   Array.from(document.getElementsByClassName('pixel'))[Math.abs(button - 1)].id = ""
-
 }
 
 function setup() {
@@ -43,30 +45,82 @@ function setup() {
 }
 
 window.onload = () => {
-  document.getElementById('numberFrames').innerHTML = `Frame:  ${currentFrame + 1} / ${maxFrames}`;
+  document.getElementById('numberFrames').innerHTML = `Frame: ${currentFrame} / ${maxFrames}`;
 }
 
-let prevX;
-let prevY;
+const otherFrame = (direction, frame) => {
+  let res;
+  if (!direction) {
+    currentFrame = frame;
+    clearCanvas = true;
+    fillGridWithPixels = true;
+    updateFramePos = true;
+    fillGridWithPixelsLocation = frame;
+    console.log('frame', frame);
+
+  } else {
+    res = currentFrame + direction;
+    if (res <= frames.length - 1 && res >= 0) {
+      currentFrame = res;
+      clearCanvas = true;
+      fillGridWithPixels = true;
+      updateFramePos = true;
+      fillGridWithPixelsLocation = res;
+    }
+  }
+}
+
+const playAnimation = () => {
+  animation = undefined;
+  let interval = document.getElementById("frameTimeVal").value;
+  if (!interval.match(/[a-z]/i)) { //if string contains no letters
+    interval = interval.replace(/\,/g, '.');
+    interval = parseFloat(interval);
+    interval *= 1000;
+    let frameToDisplay = 0;
+
+    if (interval > 1) {
+      animation = setInterval(() => {
+        if (frameToDisplay < frames.length) {
+          console.log('frameToDisplay ', frameToDisplay);
+          otherFrame(undefined, frameToDisplay);
+          frameToDisplay++;
+        } else {
+          otherFrame(undefined, 0);
+          frameToDisplay = 1;
+        }
+      }, interval);
+    }
+  }
+}
+
 function draw() {
+  if (clearCanvas) {
+    clear();
+    stroke(0, 0, 0);
+    for (let i = 0; i <= xSize; i += pixSize) line(i, 0, i, ySize);
+    for (let i = 0; i <= ySize; i += pixSize) line(0, i, xSize, i);
+    noStroke();
+    clearCanvas = false;
+  }
+
   if (newFrame) {
-    if (currentFrame + 1 < maxFrames) {
-      clear();
-      stroke(0, 0, 0);
-      for (let i = 0; i <= xSize; i += pixSize) line(i, 0, i, ySize);
-      for (let i = 0; i <= ySize; i += pixSize) line(0, i, xSize, i);
-      noStroke();
-      currentFrame++
+    if (currentFrame + 1 < maxFrames) { //TODO
+      currentFrame++;
       frames.push(emptyframeArray())
-      newFrame = false;
-      document.getElementById('numberFrames').innerHTML = `Frame:  ${currentFrame + 1} / ${maxFrames}`;
-    } else { }
+    }
+    newFrame = false;
+  }
+
+  if (updateFramePos) {
+    document.getElementById('numberFrames').innerHTML = `Frame:  ${currentFrame} / ${maxFrames}`;
+    updateFramePos = false;
   }
 
   if (fillGridWithPixels) {
-    fill(color(255, 117, 117));
-    // debugger
-    frames[currentFrame - 1].forEach((y, indexY) => {
+    fill(color(255, 117, 117)); //light red
+    console.log('fillGridWithPixelsLocation', fillGridWithPixelsLocation);
+    frames[fillGridWithPixelsLocation].forEach((y, indexY) => {
       y.forEach((x, indexX) => {
         if (x) {
           rect(indexX * pixSize + 1, indexY * pixSize + 1, pixSize - 1, pixSize - 1);
@@ -77,16 +131,17 @@ function draw() {
     fillGridWithPixels = false;
   }
 
-  if (mouseIsPressed) {
-    if (mouseX <= xSize || mouseY <= ySize) {
-      let x = Math.floor(mouseX / scale);
-      let y = Math.floor(mouseY / scale);
-      if (
-        y >= 0 &&
-        y < Ypix &&
-        x >= 0 &&
-        x < Xpix
-      ) {
+  if (mouseX <= xSize || mouseY <= ySize) {
+    let x = Math.floor(mouseX / scale);
+    let y = Math.floor(mouseY / scale);
+    if (
+      y >= 0 &&
+      y < Ypix &&
+      x >= 0 &&
+      x < Xpix
+    ) {
+      document.getElementById("matrixPos").innerHTML = `Postition: (${Math.floor(mouseX / scale)}, ${Math.floor(mouseY / scale)})`
+      if (mouseIsPressed) {
         if (pixel) fill(color(255, 0, 0));
         else {
           if (frames[currentFrame - 1][y][x]) fill(color(255, 117, 117))
@@ -97,6 +152,7 @@ function draw() {
         y *= pixSize;
         rect(x + 1, y + 1, pixSize - 1, pixSize - 1);
       }
-    }
+    } else document.getElementById("matrixPos").innerHTML = "Postition: (, )"
+
   }
 }

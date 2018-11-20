@@ -16,13 +16,20 @@
 </head>
 
 <body>
-  <div id="grid">
-    <button onclick="location.reload()" class="item0">Reset All</button>
-    <button onclick="exportFrame()" class="item1">Export</button>
-    <button onclick="newFrame = 1; fillGridWithPixels = 1" class="item2">New Frame</button>
-    <button onclick="pixel = 0; makeButtonBold(0)" class="pixel item3" id="1">Disable Pixel</button>
-    <button onclick="pixel = 1; makeButtonBold(1)" class="pixel item4" id="bold">Enable Pixel</button>
-    <div id="numberFrames" class="item5"></div>
+  <div class="grid">
+    <button onclick="location.reload()" class="resetAll">Reset All</button>
+    <button onclick="exportFrame()" class="export">Export</button>
+    <button onclick="clearCanvas = 1; newFrame = 1; fillGridWithPixels = 1; updateFramePos = 2; fillGridWithPixelsLocation = currentFrame"
+      class="newFrame">New Frame</button>
+    <button onclick="pixel = 0; makeButtonBold(0)" class="pixel disablePixel" id="1">Disable Pixel</button>
+    <button onclick="pixel = 1; makeButtonBold(1)" class="pixel enablePixel" id="bold">Enable Pixel</button>
+    <button class="prevFrame" onclick=" otherFrame(-1)"> Previous frame</button>
+    <button class="nextFrame" onclick=" otherFrame(1)">Next frame</button>
+    <div id="numberFrames" class="numberFrames"></div>
+    <div id="matrixPos">Postition: (, )</div>
+    <div class="frameTime">Time Between Frames (sec) <input type="text" value="1" id="frameTimeVal" style="width: 30%"></div>
+    <button class="playAnimation" onclick="playAnimation()">Play</button>
+    <button class="stopAnimation" onclick="clearInterval(animation)">Stop</button>
   </div>
 </body>
 
