@@ -5,6 +5,7 @@ const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const { exec } = require('child_process')
 const fs = require('fs');
+const jsonfile = require('jsonfile')
 const sketchWithoutPixelData = fs.readFileSync(path.join(__dirname, 'sketchWithoutPixelData.ino'));
 app.use(express.static(path.join(__dirname, 'public/')))
 
@@ -18,23 +19,37 @@ io.on('connection', socket => {
     let sketch = frame + sketchWithoutPixelData;
     let sketchPath = path.join(__dirname, 'sketch/sketch.ino');
     // fs.unlinkSync(sketchPath);
-    fs.writeFile(sketchPath, sketch, function (err) {
+    console.log('Saving file');
+    fs.writeFile(sketchPath, sketch, (err) => {
       if (err) {
         console.log(err);
         return;
       }
       console.log("The file was saved!");
-      console.log('uploading sketch');
       let command = 'make upload clean'
       let cwd = path.join(__dirname, 'sketch');
       exec(command, { cwd: cwd }, (err, stdout, stderr) => {
         if (err) console.error(err)
         else {
           console.log(`stderr: ${stderr}`);
+          console.log('Sketch uploaded');
           // console.log(`stdout: ${stdout}`);
         }
       });
     });
+  })
+
+  socket.on('saveAnimation', ({ arr, name }) => {
+    name = name.replace(/\./g, '');
+    name = name.replace(/\//g, '');
+    name = name.replace(/\\/g, '');
+    name += (new Date()).toLocaleDateString('en-GB').replace(/\//g, '-');
+
+    let file = path.join(__dirname, 'server/animations', name + '.json')
+    jsonfile.writeFile(file, arr, (err) => {
+      if (err) console.error(err)
+      else console.log('Animation saved');
+    })
   })
 });
 

@@ -42,7 +42,7 @@ body{
   padding: 10px;
 }
 
-.saveFrame{
+.saveAnimation{
   grid-column: 1 / 3;
   grid-row: 4;
   padding: 10px;
@@ -71,6 +71,7 @@ body{
   grid-row:6;
   padding: 10px;
 }
+
 .numberFrames {
   grid-column: 1 / 3;
   grid-row: 7;
@@ -88,6 +89,7 @@ body{
   grid-row: 9;
   padding: 10px;
 }
+
 .playAnimation{
   grid-column: 1/3;
   grid-row: 10;

@@ -5,6 +5,7 @@
   "main": "app.js",
   "dependencies": {
     "express": "^4.16.4",
+    "jsonfile": "^5.0.0",
     "nodemon": "^1.18.6",
     "npm": "^6.4.1",
     "serialport": "^7.0.2",

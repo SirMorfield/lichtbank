@@ -7,20 +7,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <link rel="stylesheet" href="./normalize.css">
-  <link rel="stylesheet" href="style.css">
-  <title>lichtbank</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.2/p5.js"></script>
-  <script src="./socketing.js"></script>
+  <link rel="stylesheet" href="./style.css">
+  <title>Dotmatrix display</title>
+  <script src="./socket.io.min.js"></script>
+  <script src="./p5.min.js"></script>
   <script src="./main.js"></script>
 </head>
 
 <body>
   <div class="grid">
     <button onclick="location.reload()" class="resetAll">Reset All</button>
-    <button onclick="exportFrame()" class="export">Export</button>
-    <button onclick="clearCanvas = 1; newFrame = 1; fillGridWithPixels = 1; updateFramePos = 2; fillGridWithPixelsLocation = currentFrame"
-      class="newFrame">New Frame</button>
+    <button onclick="exportFrame()" class="export">Export to dotmatrix display</button>
+    <button onclick="makeNewFrame()" class="newFrame">New Frame</button>
+    <button class="saveAnimation" onclick="saveAnimation()"> Save Animation</button>
     <button onclick="pixel = 0; makeButtonBold(0)" class="pixel disablePixel" id="1">Disable Pixel</button>
     <button onclick="pixel = 1; makeButtonBold(1)" class="pixel enablePixel" id="bold">Enable Pixel</button>
     <button class="prevFrame" onclick=" otherFrame(-1)"> Previous frame</button>

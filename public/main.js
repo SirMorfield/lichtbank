@@ -8,7 +8,6 @@ const maxFrames = 20;
 const socket = io();
 let currentFrame = 0;
 let pixel = 1;
-var p5 = new p5();
 let newFrame = false;
 let fillGridWithPixels = false;
 let fillGridWithPixelsLocation = 0;
@@ -56,7 +55,6 @@ const otherFrame = (direction, frame) => {
     fillGridWithPixels = true;
     updateFramePos = true;
     fillGridWithPixelsLocation = frame;
-    console.log('frame', frame);
 
   } else {
     res = currentFrame + direction;
@@ -94,6 +92,22 @@ const playAnimation = () => {
   }
 }
 
+const saveAnimation = () => {
+  let res = {
+    arr: frames,
+    name: prompt('Filename to save', 'Only letters')
+  }
+  socket.emit('saveAnimation', res)
+}
+
+const makeNewFrame = () => {
+  clearCanvas = 1;
+  newFrame = 1;
+  fillGridWithPixels = 1;
+  updateFramePos = 2;
+  fillGridWithPixelsLocation = currentFrame
+}
+
 function draw() {
   if (clearCanvas) {
     clear();
@@ -118,7 +132,7 @@ function draw() {
   }
 
   if (fillGridWithPixels) {
-    fill(color(255, 117, 117)); //light red
+    fill(color(255, 165, 165)); //light red
     console.log('fillGridWithPixelsLocation', fillGridWithPixelsLocation);
     frames[fillGridWithPixelsLocation].forEach((y, indexY) => {
       y.forEach((x, indexX) => {
@@ -144,7 +158,7 @@ function draw() {
       if (mouseIsPressed) {
         if (pixel) fill(color(255, 0, 0));
         else {
-          if (frames[currentFrame - 1][y][x]) fill(color(255, 117, 117))
+          if (frames[currentFrame - 1][y][x]) fill(color(255, 165, 165))
           else fill(color(255, 255, 255))
         }
         frames[currentFrame][y][x] = pixel;
