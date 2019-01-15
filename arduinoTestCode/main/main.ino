@@ -95,6 +95,8 @@ void setup() {
   pinMode(latchPin, OUTPUT);
   pinMode(clockPin, OUTPUT);
   pinMode(data1Pin, OUTPUT);
+  Serial.begin(115200);
+  Serial.println("start");
 }
 
 void loop() {
@@ -104,6 +106,7 @@ void loop() {
       for (int x = 0; x < Xpix; x += 8) {
         for (int y2 = 0; y2 <= 7; y2++) {
           digitalWrite(clockPin, LOW);
+          Serial.println(String(y2 + block)+ ", "+ String(x + y));
           byte res = pgm_read_word_near(&frame1[y2 + block][x + y]);
           digitalWrite(data1Pin, res); //This is where the magic happens
           digitalWrite(clockPin, HIGH);
@@ -123,5 +126,7 @@ void loop() {
       }
     }
     digitalWrite(latchPin, LOW);
+ Serial.println("--------------");
   }
+
 }
