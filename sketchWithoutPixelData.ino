@@ -3,9 +3,9 @@
 #define latchPin A1 //ST_CP
 #define data1Pin A2 //DS
 
-#define Ypix 16   //counting from 0 intervals of 8
+#define Ypix 48   //counting from 0 intervals of 8
 #define Xpix 48   //counting from 0 intervals of 8
-#define Yblocks 2 // Ypix / 8
+#define Yblocks 6 // Ypix / 8
 
 void setup()
 {

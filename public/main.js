@@ -1,5 +1,5 @@
 const scale = 12; //only whole numbers
-const Ypix = 72; //72
+const Ypix = 48; //72
 const Xpix = 48;
 const xSize = Xpix * scale;
 const ySize = Ypix * scale;
