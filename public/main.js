@@ -1,5 +1,5 @@
-const scale = 12; //only whole numbers
-const Ypix = 48; //72
+const scale = 18; //only whole numbers
+const Ypix = 48; // multiple of 8
 const Xpix = 48;
 const xSize = Xpix * scale;
 const ySize = Ypix * scale;
@@ -23,10 +23,9 @@ const emptyframeArray = () => {
 let frames = [emptyframeArray()]
 
 const exportFrame = () => {
-  let res = `const PROGMEM int frame1[${Ypix}][${Xpix}] = `;
-  res += JSON.stringify(frames).replace(/\[/g, '{').replace(/\]/g, '}')
+  let res = `const byte frame1[${Ypix}][${Xpix}] = `;
+  res += JSON.stringify(frames[0]).replace(/\[/g, '{').replace(/\]/g, '}')
   res += ';'
-  console.log(res);
   socket.emit('frame', res);
 }
 

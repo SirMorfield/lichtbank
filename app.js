@@ -6,7 +6,6 @@ const io = require('socket.io')(http);
 const { exec } = require('child_process')
 const fs = require('fs');
 const jsonfile = require('jsonfile')
-const sketchWithoutPixelData = fs.readFileSync(path.join(__dirname, 'sketchWithoutPixelData.ino'));
 app.use(express.static(path.join(__dirname, 'public/')))
 
 app.get('/', (req, res) => {
@@ -16,6 +15,7 @@ app.get('/', (req, res) => {
 io.on('connection', socket => {
   console.log('a user connected');
   socket.on('frame', (frame) => {
+    const sketchWithoutPixelData = fs.readFileSync(path.join(__dirname, 'sketchWithoutPixelData.ino'));
     let sketch = frame + sketchWithoutPixelData;
     let sketchPath = path.join(__dirname, 'sketch/sketch.ino');
     // fs.unlinkSync(sketchPath);
@@ -41,9 +41,7 @@ io.on('connection', socket => {
 
   socket.on('saveAnimation', ({ arr, name }) => {
     name = name.replace(/\./g, '');
-    name = name.replace(/\//g, '');
-    name = name.replace(/\\/g, '');
-    name += (new Date()).toLocaleDateString('en-GB').replace(/\//g, '-');
+    name += '(' + (new Date()).toLocaleDateString('en-GB').replace(/\//g, '-') + ')';
 
     let file = path.join(__dirname, 'server/animations', name + '.json')
     jsonfile.writeFile(file, arr, (err) => {
