@@ -38,7 +38,9 @@ void loop()
         PORTC = B10000011;
       }
     }
+    delayMicroseconds(100);
     PORTC = B00000000;
+    delayMicroseconds(100);
     // digitalWrite(latchPin, LOW);
   }
 }

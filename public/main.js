@@ -156,7 +156,7 @@ function draw() {
       if (mouseIsPressed) {
         if (pixel) fill(color(255, 0, 0));
         else {
-          if (frames[currentFrame - 1][y][x]) fill(color(255, 165, 165))
+          if (frames[currentFrame][y][x]) fill(color(255, 165, 165))
           else fill(color(255, 255, 255))
         }
         frames[currentFrame][y][x] = pixel;
