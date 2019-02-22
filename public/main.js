@@ -1,6 +1,7 @@
-const scale = 18; //only whole numbers
-const Ypix = 48; // multiple of 8
 const Xpix = 48;
+const Ypix = 48;
+
+const scale = 18; // only whole numbers
 const xSize = Xpix * scale;
 const ySize = Ypix * scale;
 const pixSize = xSize / Xpix;
@@ -14,6 +15,7 @@ let fillGridWithPixelsLocation = 0;
 let clearCanvas = false;
 let updateFramePos = false;
 let animation;
+
 const emptyframeArray = () => {
   let arr = [];
   for (let i = 0; i < Ypix; i++) arr.push(new Array(Xpix).fill(0)) //filling frame array with 0s
@@ -23,10 +25,7 @@ const emptyframeArray = () => {
 let frames = [emptyframeArray()]
 
 const exportFrame = () => {
-  let res = `const byte frame1[${Ypix}][${Xpix}] = `;
-  res += JSON.stringify(frames[0]).replace(/\[/g, '{').replace(/\]/g, '}')
-  res += ';'
-  socket.emit('frame', res);
+  socket.emit('frames', frames);
 }
 
 const makeButtonBold = (button) => {
