@@ -19,7 +19,7 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/index.html'))
 });
 
-function serializeFrame(frame) {
+function serializeFrame(frame, arrayOnly = false) {
   let arr = [[], [], [], [], [], [], [], []];
 
   // converting a human readable format where the structure of the 2d array represents the actual image you want too create
@@ -66,11 +66,11 @@ function serializeFrame(frame) {
     }
     arr[a] = newColumn
   }
+  if (arrayOnly) return arr;
 
-  let res = `const byte frame[8][${arr[0].length}] = `;
+  let res = `byte frame[8][${arr[0].length}] = `;
   res += JSON.stringify(arr).replace(/\[/g, '{').replace(/\]/g, '}');
   res += ';\n';
-
   return res;
 }
 

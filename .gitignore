@@ -13,3 +13,4 @@ package-lock.json
 temp.json
 temp.js
 .vscode/
+sketch/sketch.ino
