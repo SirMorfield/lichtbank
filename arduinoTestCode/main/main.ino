@@ -15,7 +15,6 @@ void setup()
   pinMode(latchPin, OUTPUT);
   pinMode(clockPin, OUTPUT);
   pinMode(dataPin, OUTPUT);
-  Serial.begin(115200);
 }
 
 void loop()

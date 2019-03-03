@@ -21,11 +21,6 @@ app.get('/', (req, res) => {
 
 function serializeFrame(frame, arrayOnly = false, log = false) {
   let arr = [];
-  // converting a human readable format where the structure of the 2d array represents the actual image you want too create
-  // eg. if you want to make a circle the d2 array will show a circle of 1s
-  // the matrix doesn't understand this and thus need some comvertion
-  // each module consists of 48 horizontal and 8 vertical pixels, it is a multiplexed display so we only show one of the 8 vertical columns at the time
-  // this results in a array of 8 arrays with each 48 + 8 (the 8 is for wich row to show 10000000 is the first row. 01000000 is the second) booleans in it
   for (let column = 0; column < 8; column++) {
     for (let panel = Ypix / 8 - 1; panel >= 0; panel--) {
       if (panel % 2 == 1) {
@@ -66,19 +61,19 @@ function serializeFrame(frame, arrayOnly = false, log = false) {
   if (log) console.log(JSON.stringify(arr));
   if (arrayOnly) return arr;
 
-  let res = `#define frameLength ${arr.length}\n`;
-  res += `#define maxCounter ${7 * (Ypix / 8)}\n`
-  res += `byte frame[frameLength] = `;
-  res += JSON.stringify(arr).replace(/\[/g, '{').replace(/\]/g, '}');
-  res += ';\n';
-  return res;
+  let frame = `#define frameLength ${arr.length}\n`;
+  frame += `byte frame[frameLength] = `;
+  frame += JSON.stringify(arr).replace(/\[/g, '{').replace(/\]/g, '}');
+  frame += ';\n';
+
+  return { frame };
 }
 
 
 io.on('connection', (socket) => {
   socket.on('frames', async (frames) => {
     const sketchWithoutPixelData = await readFile(path.join(__dirname, 'server/sketchWithoutPixelData.ino'));
-    let sketch = serializeFrame(frames[0])
+    let sketch = serializeFrame(frames[0]).frame
     sketch += sketchWithoutPixelData;
 
     await writeFile(path.join(__dirname, 'sketch/sketch.ino'), sketch);

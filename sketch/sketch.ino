@@ -1,43 +1,41 @@
-#define frameLength 336
-#define maxCounter 42
-byte frame[frameLength] = {0,0,0,0,0,0,127,0,0,0,0,0,0,127,0,0,0,0,0,0,127,0,0,0,0,0,0,127,0,0,0,0,0,0,127,0,0,0,0,0,0,127,0,0,0,0,0,0,191,0,0,0,0,0,0,191,0,0,0,0,0,0,191,0,0,0,0,0,0,191,0,0,0,0,0,0,191,0,0,0,0,0,0,191,0,0,0,0,0,0,223,0,0,0,0,0,0,223,0,0,0,0,0,0,223,0,0,0,0,0,0,223,0,0,0,0,0,0,223,0,0,0,0,0,0,223,0,0,0,0,0,0,239,0,0,0,0,0,0,239,0,0,0,0,0,0,239,0,0,0,0,0,0,239,0,0,0,0,0,0,239,0,0,0,0,0,0,239,0,0,0,0,0,0,247,0,0,0,0,0,0,247,0,0,0,0,0,0,247,0,0,0,0,0,0,247,0,0,0,0,0,0,247,0,0,0,0,0,0,247,0,0,0,0,0,0,251,0,0,0,0,0,0,251,0,0,0,0,0,0,251,0,0,0,0,0,0,251,0,0,0,0,0,0,251,0,0,0,0,0,0,251,0,0,0,0,0,0,253,0,0,0,0,0,0,253,0,0,0,0,0,0,253,0,0,0,0,0,0,253,0,0,0,0,0,0,253,0,0,0,0,0,0,253,0,0,0,0,0,0,254,0,0,0,0,0,0,254,0,0,0,0,0,0,254,0,0,0,0,0,0,254,0,0,0,0,0,0,254,0,0,0,0,0,0,254};
+#include <Wire.h>
+#define SLAVE_ADDRESS 0x04
+#define LED 13
 
-// keep this line here
-
-#define clockPin A0 // clock   SH_CP   geel
-#define latchPin A1 // latch   ST_CP   paars
-#define dataPin A2  // data    DS      bruin
-
+int number = 0;
 int counter = 0;
+byte arr[336];
+
+void receiveData(int byteCount)
+{
+  while (Wire.available())
+  {
+    number = Wire.read();
+    arr[counter] = number;
+    counter++;
+  }
+}
+
+void sendData()
+{
+  byte result = 0;
+  for (int i = 0; i < 336; i++)
+  {
+    result += arr[i];
+  }
+
+  Wire.write(result);
+}
+
 void setup()
 {
-  pinMode(latchPin, OUTPUT);
-  pinMode(clockPin, OUTPUT);
-  pinMode(dataPin, OUTPUT);
+  pinMode(LED, OUTPUT);
+  Wire.begin(SLAVE_ADDRESS);
+  Wire.onReceive(receiveData);
+  Wire.onRequest(sendData);
 }
 
 void loop()
 {
-  PORTC = B00000010; // digitalWrite(latchPin, HIGH);
-  for (int i = 0; i < 336; i++)
-  {
-    for (int b = 7; b >= 0; b--)
-    {
-      PORTC = B00000010; // digitalWrite(clockPin, LOW);
-      if (bitRead(frame[i], b))
-        PORTC = B00000110; // digitalWrite(dataPin, HIGH);
-      else
-        PORTC = B00000010; // digitalWrite(dataPin, LOW);
-
-      PORTC = B10000011; // digitalWrite(clockPin, HIGH);
-    }
-    counter++;
-    if (counter == maxCounter)
-    {
-      counter = 0;
-      PORTC = B00000000; // digitalWrite(latchPin, LOW);
-      delayMicroseconds(9);
-      PORTC = B00000010; // digitalWrite(latchPin, HIGH);
-    }
-  }
+  // delay(100);
 }
