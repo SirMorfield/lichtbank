@@ -19,9 +19,8 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/index.html'))
 });
 
-function serializeFrame(frame, arrayOnly = false) {
-  let arr = [[], [], [], [], [], [], [], []];
-
+function serializeFrame(frame, arrayOnly = false, log = false) {
+  let arr = [];
   // converting a human readable format where the structure of the 2d array represents the actual image you want too create
   // eg. if you want to make a circle the d2 array will show a circle of 1s
   // the matrix doesn't understand this and thus need some comvertion
@@ -33,59 +32,59 @@ function serializeFrame(frame, arrayOnly = false) {
         for (let block = 0; block < 6; block++) {
           for (let y = 0; y < 8; y++) {
             let x = (7 - column) + (block * 8);
-            arr[column].push(frame[y + (panel * 8)][x]);
+            arr.push(frame[y + (panel * 8)][x]);
           }
         }
       } else {
         for (let block = 0; block < 6; block++) {
           for (let y = 7; y >= 0; y--) {
             let x = Xpix - 1 - (7 - column) - (block * 8);
-            arr[column].push(frame[y + (panel * 8)][x]);
+            arr.push(frame[y + (panel * 8)][x]);
           }
         }
       }
       for (let i = 0; i < 8; i++) {
-        if (i == column) arr[column].push(0);
-        else arr[column].push(1);
+        if (i == column) arr.push(0);
+        else arr.push(1);
       }
     }
   }
 
   // this replaces the array of bits with an array of bytes
   // so [1,0,0,1,1,1,0,1,1,0,0,1,1,1,0,1](16 bits) becomes [200,145](two bytes in base 10 format because js doesnt want to store bits)
-  for (let a = 0; a < arr.length; a++) {
-    let column = arr[a];
-    let newColumn = [];
-    for (let b = 0; b < column.length; b += 8) {
-      let byte = '';
-      for (let c = 0; c < 8; c++) {
-        byte += String(column[b + c]);
-      }
-      byte = parseInt(byte, 2);
-      newColumn.push(byte);
+  let newArr = [];
+  for (let i = 0; i < arr.length; i += 8) {
+    let byte = '';
+    for (let bit = 0; bit < 8; bit++) {
+      byte += String(arr[bit + i]);
     }
-    arr[a] = newColumn
+    byte = parseInt(byte, 2);
+    newArr.push(byte);
   }
+  arr = newArr;
+
+  if (log) console.log(JSON.stringify(arr));
   if (arrayOnly) return arr;
 
-  let res = `byte frame[8][${arr[0].length}] = `;
+  let res = `#define frameLength ${arr.length}\n`;
+  res += `#define maxCounter ${7 * (Ypix / 8)}\n`
+  res += `byte frame[frameLength] = `;
   res += JSON.stringify(arr).replace(/\[/g, '{').replace(/\]/g, '}');
   res += ';\n';
   return res;
 }
 
+
 io.on('connection', (socket) => {
   socket.on('frames', async (frames) => {
     const sketchWithoutPixelData = await readFile(path.join(__dirname, 'server/sketchWithoutPixelData.ino'));
     let sketch = serializeFrame(frames[0])
-    sketch += `#define Xpix ${Xpix}\n`;
-    sketch += `#define Ypix ${Ypix}\n`;
     sketch += sketchWithoutPixelData;
 
     await writeFile(path.join(__dirname, 'sketch/sketch.ino'), sketch);
 
-    exec('make upload clean', { cwd: path.join(__dirname, 'sketch') }, (err, stdout, stderr) => {
-      if (err) console.error(err)
+    exec('make upload', { cwd: path.join(__dirname, 'sketch') }, (err, stdout, stderr) => {
+      if (err) console.error(err);
       else {
         console.log(`stderr: ${stderr}`);
         console.log('Sketch uploaded');

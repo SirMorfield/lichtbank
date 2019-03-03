@@ -19,7 +19,6 @@ void loop()
   {
 
     // digitalWrite(latchPin, HIGH);
-    PORTC = B00000010;
     for (byte i = 0; i < 7 * (Ypix / 8); i++)
     {
       for (byte b = 0; b < 8; b++)
