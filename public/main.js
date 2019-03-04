@@ -25,7 +25,8 @@ const emptyframeArray = () => {
 let frames = [emptyframeArray()]
 
 const exportFrame = () => {
-  socket.emit('frames', frames);
+  const name = prompt('Name this animation')
+  socket.emit('frames', { frames, name });
 }
 
 const makeButtonBold = (button) => {

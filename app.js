@@ -3,13 +3,16 @@ const express = require('express')
 const app = express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
-const { exec } = require('child_process')
-const fs = require('fs');
 const { promisify } = require('util');
-const writeFile = promisify(fs.writeFile);
-const readFile = promisify(fs.readFile);
-const jsonfile = require('jsonfile');
 
+let { exec } = require('child_process')
+exec = promisify(exec)
+
+const fs = require('fs');
+const readDir = promisify(fs.readdir);
+const unlink = promisify(fs.unlink)
+
+let jsonfile = require('jsonfile');
 const Xpix = 48;
 const Ypix = 48;
 
@@ -19,7 +22,7 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/index.html'))
 });
 
-function serializeFrame(frame, arrayOnly = false, log = false) {
+function serializeFrame(frame, log = false) {
   let arr = [];
   for (let column = 0; column < 8; column++) {
     for (let panel = Ypix / 8 - 1; panel >= 0; panel--) {
@@ -59,34 +62,34 @@ function serializeFrame(frame, arrayOnly = false, log = false) {
   arr = newArr;
 
   if (log) console.log(JSON.stringify(arr));
-  if (arrayOnly) return arr;
-
-  let frame = `#define frameLength ${arr.length}\n`;
-  frame += `byte frame[frameLength] = `;
-  frame += JSON.stringify(arr).replace(/\[/g, '{').replace(/\]/g, '}');
-  frame += ';\n';
-
-  return { frame };
+  return arr;
 }
 
+io.on('connection', async (socket) => {
+  socket.on('frames', async ({ frames, name }) => {
+    let newFrames = serializeFrame(frames[0], true)
 
-io.on('connection', (socket) => {
-  socket.on('frames', async (frames) => {
-    const sketchWithoutPixelData = await readFile(path.join(__dirname, 'server/sketchWithoutPixelData.ino'));
-    let sketch = serializeFrame(frames[0]).frame
-    sketch += sketchWithoutPixelData;
+    await jsonfile.writeFile(path.join(__dirname, 'server/frames/', name + '.json'), newFrames)
 
-    await writeFile(path.join(__dirname, 'sketch/sketch.ino'), sketch);
+    const currentFramesDir = path.join(__dirname, 'server/frames/currentFrames/')
+    const files = await readDir(currentFramesDir)
+    for (const file of files) {
+      await unlink(path.join(currentFramesDir, file))
+    }
 
-    exec('make upload', { cwd: path.join(__dirname, 'sketch') }, (err, stdout, stderr) => {
-      if (err) console.error(err);
-      else {
-        console.log(`stderr: ${stderr}`);
-        console.log('Sketch uploaded');
-        // console.log(`stdout: ${stdout}`);
-      }
-    });
+    await jsonfile.writeFile(path.join(currentFramesDir, Date.now() + '.json'), newFrames)
+    console.log('saved');
   });
+
+  // exec('make upload', { cwd: path.join(__dirname) }, (err, stdout, stderr) => {
+  //   if (err) console.error(err);
+  //   else {
+  //     console.log(`stderr: ${stderr}`);
+  //     console.log('Sketch uploaded');
+  //     // console.log(`stdout: ${stdout}`);
+  //   }
+  // });
+
 
   socket.on('saveAnimation', ({ arr, name }) => {
     name = name.replace(/\./g, '');

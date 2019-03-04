@@ -1,41 +1,64 @@
-#include <Wire.h>
-#define SLAVE_ADDRESS 0x04
-#define LED 13
 
-int number = 0;
-int counter = 0;
-byte arr[336];
+#include <Wire.h>
+#define address 0x04
+
+#define frameLength 336
+#define maxBytesShifted 42 // 7 * (yPix /8)
+
+#define clockPin A0 // clock   SH_CP   geel
+#define latchPin A1 // latch   ST_CP   paars
+#define dataPin A2  // data    DS      bruin
+
+byte frame[frameLength] = {};
+int bytesShifted = 0;
+int bytePos = 0;
 
 void receiveData(int byteCount)
 {
   while (Wire.available())
   {
-    number = Wire.read();
-    arr[counter] = number;
-    counter++;
+    byte number = Wire.read();
+    frame[bytePos] = number;
+    bytePos++;
+    if (bytePos == frameLength)
+    {
+      bytePos = 0;
+    }
   }
-}
-
-void sendData()
-{
-  byte result = 0;
-  for (int i = 0; i < 336; i++)
-  {
-    result += arr[i];
-  }
-
-  Wire.write(result);
 }
 
 void setup()
 {
-  pinMode(LED, OUTPUT);
-  Wire.begin(SLAVE_ADDRESS);
+  Wire.begin(address);
   Wire.onReceive(receiveData);
-  Wire.onRequest(sendData);
+
+  pinMode(latchPin, OUTPUT);
+  pinMode(clockPin, OUTPUT);
+  pinMode(dataPin, OUTPUT);
 }
 
 void loop()
 {
-  // delay(100);
+  PORTC = B00000010; // digitalWrite(latchPin, HIGH);
+  for (int i = 0; i < frameLength; i++)
+  {
+    for (int b = 7; b >= 0; b--)
+    {
+      PORTC = B00000010; // digitalWrite(clockPin, LOW);
+      if (bitRead(frame[i], b))
+        PORTC = B00000110; // digitalWrite(dataPin, HIGH);
+      else
+        PORTC = B00000010; // digitalWrite(dataPin, LOW);
+
+      PORTC = B10000011; // digitalWrite(clockPin, HIGH);
+    }
+    bytesShifted++;
+    if (bytesShifted == maxBytesShifted)
+    {
+      bytesShifted = 0;
+      PORTC = B00000000; // digitalWrite(latchPin, LOW);
+      delayMicroseconds(9);
+      PORTC = B00000010; // digitalWrite(latchPin, HIGH);
+    }
+  }
 }
