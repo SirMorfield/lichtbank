@@ -5,16 +5,13 @@ const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const { promisify } = require('util');
 
-let { exec } = require('child_process')
-exec = promisify(exec)
-
-const fs = require('fs');
-const readDir = promisify(fs.readdir);
-const unlink = promisify(fs.unlink)
+const exec = promisify(require('child_process').exec);
 
 let jsonfile = require('jsonfile');
 const Xpix = 48;
 const Ypix = 48;
+const frameLength = 336
+
 
 app.use(express.static(path.join(__dirname, 'public/')))
 
@@ -65,20 +62,25 @@ function serializeFrame(frame, log = false) {
   return arr;
 }
 
-io.on('connection', async (socket) => {
-  socket.on('frames', async ({ frames, name }) => {
-    let newFrames = serializeFrame(frames[0], true)
+let writeToMatrix = setInterval(() => {
 
-    await jsonfile.writeFile(path.join(__dirname, 'server/frames/', name + '.json'), newFrames)
+}, 1000)
+let currentFrames = []
 
-    const currentFramesDir = path.join(__dirname, 'server/frames/currentFrames/')
-    const files = await readDir(currentFramesDir)
-    for (const file of files) {
-      await unlink(path.join(currentFramesDir, file))
-    }
+io.on('connection', (socket) => {
+  socket.on('frames', ({ frames, interval }) => {
+    let serializedFrames = serializeFrame(frames[0])
+    newframes = JSON.stringify(newFrames)
+    newFrames = newFrames.substring(1, newFrames.length)
 
-    await jsonfile.writeFile(path.join(currentFramesDir, Date.now() + '.json'), newFrames)
-    console.log('saved');
+    clearInterval(writeToMatrix)
+
+    writeToMatrix = setInterval(() => {
+
+      exec(`python3 i2c.py ${newFrames} ${frameLength}`, { cwd: path.join(__dirname, '/server') })
+
+    }, interval);
+
   });
 
   // exec('make upload', { cwd: path.join(__dirname) }, (err, stdout, stderr) => {
