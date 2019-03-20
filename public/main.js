@@ -1,7 +1,7 @@
 const Xpix = 48;
 const Ypix = 48;
 
-const scale = 18; // only whole numbers
+const scale = 18; // only natural numbers
 const xSize = Xpix * scale;
 const ySize = Ypix * scale;
 const pixSize = xSize / Xpix;
@@ -25,8 +25,7 @@ const emptyframeArray = () => {
 let frames = [emptyframeArray()]
 
 const exportFrame = () => {
-  const name = prompt('Name this animation')
-  socket.emit('frames', { frames, name });
+  socket.emit('frames', { frames, interval: getFrameInterval() });
 }
 
 const makeButtonBold = (button) => {
@@ -67,29 +66,33 @@ const otherFrame = (direction, frame) => {
   }
 }
 
+function getFrameInterval() {
+  let interval = document.getElementById("frameTimeVal").value;
+  if (interval.match(/[a-z]/i)) return 700
+  interval = interval.replace(/\,/g, '.');
+  interval = parseFloat(interval);
+  if (interval < 0.05) return 700
+
+  interval *= 1000;
+  return interval;
+}
+
 const playAnimation = () => {
   animation = undefined;
-  let interval = document.getElementById("frameTimeVal").value;
-  if (!interval.match(/[a-z]/i)) { //if string contains no letters
-    interval = interval.replace(/\,/g, '.');
-    interval = parseFloat(interval);
-    interval *= 1000;
-    let frameToDisplay = 0;
+  let interval = getFrameInterval()
+  let frameToDisplay = 0;
 
-    if (interval > 1) {
-      animation = setInterval(() => {
-        if (frameToDisplay < frames.length) {
-          console.log('frameToDisplay ', frameToDisplay);
-          otherFrame(undefined, frameToDisplay);
-          frameToDisplay++;
-        } else {
-          otherFrame(undefined, 0);
-          frameToDisplay = 1;
-        }
-      }, interval);
+  animation = setInterval(() => {
+    if (frameToDisplay < frames.length) {
+      otherFrame(undefined, frameToDisplay);
+      frameToDisplay++;
+    } else {
+      otherFrame(undefined, 0);
+      frameToDisplay = 1;
     }
-  }
+  }, interval);
 }
+
 
 const saveAnimation = () => {
   let res = {
@@ -118,7 +121,7 @@ function draw() {
   }
 
   if (newFrame) {
-    if (currentFrame + 1 < maxFrames) { //TODO
+    if (currentFrame + 1 < maxFrames) { // TODO
       currentFrame++;
       frames.push(emptyframeArray())
     }
@@ -131,7 +134,7 @@ function draw() {
   }
 
   if (fillGridWithPixels) {
-    fill(color(255, 165, 165)); //light red
+    fill(color(255, 165, 165)); // light red
     console.log('fillGridWithPixelsLocation', fillGridWithPixelsLocation);
     frames[fillGridWithPixelsLocation].forEach((y, indexY) => {
       y.forEach((x, indexX) => {

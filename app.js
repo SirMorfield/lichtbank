@@ -61,23 +61,35 @@ function serializeFrame(frame, log = false) {
   if (log) console.log(JSON.stringify(arr));
   return arr;
 }
-
-let writeToMatrix = setInterval(() => {
-
-}, 1000)
-let currentFrames = []
+let writeToMatrix;
+let framePos = 0;
+let maxFramePos = 0;
+let serialized;
 
 io.on('connection', (socket) => {
   socket.on('frames', ({ frames, interval }) => {
-    let serializedFrames = serializeFrame(frames[0])
-    newframes = JSON.stringify(newFrames)
-    newFrames = newFrames.substring(1, newFrames.length)
+    maxFramePos = frames.length - 1;
+    let newSerialized = []
 
-    clearInterval(writeToMatrix)
+    frames.forEach(frame => {
+      let strArr = serializeFrame(frame)
+      strArr = JSON.stringify(strArr)
+      strArr = strArr.substring(1, strArr.length)
+      newSerialized.push(strArr)
+    });
 
+    serialized = newSerialized
+
+    if (writeToMatrix) clearInterval(writeToMatrix)
+    writeToMatrix = setInterval(() => {
+      exec(`python3 i2c.py ${serialized[framePos]} ${frameLength}`, { cwd: path.join(__dirname, '/server') })
+      framePos++
+      if (framePos > maxFramePos) framePos = 0
+    }, interval)
+
+    let currentFrames = []
     writeToMatrix = setInterval(() => {
 
-      exec(`python3 i2c.py ${newFrames} ${frameLength}`, { cwd: path.join(__dirname, '/server') })
 
     }, interval);
 
