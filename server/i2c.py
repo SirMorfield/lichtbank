@@ -1,7 +1,7 @@
 import smbus
 import sys
 
-frames sys.argv[1].split(',')
+frames = sys.argv[1].split(',')
 bus = smbus.SMBus(1)
 
 address = 0x04

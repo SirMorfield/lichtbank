@@ -74,7 +74,7 @@ io.on('connection', (socket) => {
     frames.forEach(frame => {
       let strArr = serializeFrame(frame)
       strArr = JSON.stringify(strArr)
-      strArr = strArr.substring(1, strArr.length)
+      strArr = strArr.substring(1, strArr.length - 1)
       newSerialized.push(strArr)
     });
 
