@@ -15,3 +15,5 @@ temp.js
 .vscode/
 sketch/sketch.ino
 sketch/build*
+env/
+__pycache__/

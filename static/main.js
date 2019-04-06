@@ -97,7 +97,8 @@ const playAnimation = () => {
 const saveAnimation = () => {
   let res = {
     arr: frames,
-    name: prompt('Filename to save', 'Only letters')
+    name: prompt('Filename to save', 'Only letters'),
+    interval
   }
   socket.emit('saveAnimation', res)
 }

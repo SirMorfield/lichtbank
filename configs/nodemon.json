@@ -7,9 +7,7 @@
     "node_modules/",
     ".npm",
     ".eslintcache",
-    "users.json",
     "package-lock.json",
-    "sessions/",
     "temp.*"
   ],
   "verbose": false,
