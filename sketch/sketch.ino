@@ -8,6 +8,8 @@
 #define clockPin A0 // clock   SH_CP   geel
 #define latchPin A1 // latch   ST_CP   paars
 #define dataPin A2  // data    DS      bruin
+#define bytePosResetPin A3
+#define greenLED 9
 
 byte frame[frameLength] = {};
 int bytesShifted = 0;
@@ -20,10 +22,6 @@ void receiveData(int byteCount)
     byte number = Wire.read();
     frame[bytePos] = number;
     bytePos++;
-    if (bytePos == frameLength)
-    {
-      bytePos = 0;
-    }
   }
 }
 
@@ -32,9 +30,15 @@ void setup()
   Wire.begin(address);
   Wire.onReceive(receiveData);
 
+  pinMode(greenLED, OUTPUT);
+  digitalWrite(greenLED, HIGH);
+  delay(1000);
+  digitalWrite(greenLED, LOW);
+
   pinMode(latchPin, OUTPUT);
   pinMode(clockPin, OUTPUT);
   pinMode(dataPin, OUTPUT);
+  pinMode(bytePosResetPin, INPUT);
 }
 
 void loop()
@@ -42,6 +46,16 @@ void loop()
   PORTC = B00000010; // digitalWrite(latchPin, HIGH);
   for (int i = 0; i < frameLength; i++)
   {
+    if (digitalRead(bytePosResetPin) == HIGH)
+    {
+      bytePos = 0;
+      digitalWrite(greenLED, HIGH);
+    }
+    else
+    {
+      digitalWrite(greenLED, LOW);
+    }
+
     for (int b = 7; b >= 0; b--)
     {
       PORTC = B00000010; // digitalWrite(clockPin, LOW);

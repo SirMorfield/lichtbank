@@ -11,7 +11,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "debug": "nodemon ./app.js --config configs/nodemon.json",
+    "dev": "nodemon ./app.js --config configs/nodemon.json",
     "production": "NODE_ENV=production pm2 start ./configs/app.json"
   },
   "repository": {
