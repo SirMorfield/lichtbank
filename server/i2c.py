@@ -1,30 +1,43 @@
-import smbus
-import sys
-import sched
-import time
+from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+import json
 
-bus = smbus.SMBus(1)
 
-s = sched.scheduler(time.time, time.sleep)
+from smbus import SMBus
+from time import sleep
+import RPi.GPIO as GPIO
+GPIO.setmode(GPIO.BCM)
+GPIO.setwarnings(False)
+GPIO.setup(21, GPIO.OUT)
+bus = SMBus(1)
 
-currentS = None
-def upload(sc, pos, interval, frames):
-  if currentS:
-    s.cancel(currentS)
+def upload(i2cBytes):
+  GPIO.output(21, GPIO.HIGH)
+  sleep(0.0001)
+  GPIO.output(21, GPIO.LOW)
+  sleep(0.0001)
 
-  address = 0x04
-  for byte in frames[pos]:
-    bus.write_byte(address, byte)
+  for i2cByte in i2cBytes:
+    bus.write_byte(0x04, i2cByte)
 
-  pos += 1
 
-  if pos == len(frames):
-    pos = 0
+class Server(BaseHTTPRequestHandler):
+  def _set_headers(self):
+    self.send_response(200)
+    self.send_header('Content-type', 'application/json')
+    self.end_headers()
 
-  if len(frames) > 1:
-    currentS = s.enter(interval, 1, upload, (sc, pos, interval, frames, ))
+  def do_POST(self):
+    length = int(self.headers.getheader('content-length'))
+    message = json.loads(self.rfile.read(length))
+    upload(message)
 
-def uploadAnimation(frames, interval):
-  upload(s, 0, interval, frames)
-  if s.empty():
-    s.run()
+    self._set_headers()
+
+def run(server_class=HTTPServer, handler_class=Server, port=8081):
+  server_address = ('', port)
+  httpd = server_class(server_address, handler_class)
+
+  httpd.serve_forever()
+
+if __name__ == "__main__":
+  run()

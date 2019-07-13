@@ -4,9 +4,11 @@ const app = express()
 const http = require('http').Server(app)
 const io = require('socket.io')(http)
 const jsonfile = require('jsonfile')
-const exec = require('child_process').exec
 
-const begin = Date.now()
+const spawn = require('child_process').spawn
+
+const python = spawn('python3', ['i2c.py'], { cwd: 'server/' })
+
 const Ypix = 48
 const Xpix = 48
 
@@ -67,62 +69,34 @@ function serializeFrames(frames) {
   return newFrames
 }
 
-
 let pos = 0
 let globalFrames = [[0, 0, 0, 0, 0, 0, 127, 0, 0, 0, 0, 0, 0, 127, 0, 96, 4, 8, 0, 0, 127, 0, 0, 127, 0, 0, 0, 127, 0, 24, 128, 48, 0, 0, 127, 0, 0, 0, 0, 0, 0, 127, 0, 0, 0, 0, 0, 0, 191, 0, 0, 0, 0, 0, 0, 191, 0, 192, 4, 8, 0, 0, 191, 0, 0, 0, 0, 0, 0, 191, 0, 6, 0, 32, 0, 0, 191, 0, 0, 0, 0, 0, 0, 191, 0, 0, 0, 0, 0, 0, 223, 0, 0, 0, 0, 0, 0, 223, 0, 128, 8, 8, 0, 0, 223, 0, 0, 0, 0, 0, 0, 223, 0, 3, 64, 64, 0, 0, 223, 0, 0, 0, 0, 0, 0, 223, 0, 0, 0, 0, 0, 0, 239, 0, 0, 0, 0, 0, 0, 239, 0, 0, 8, 4, 0, 0, 239, 0, 255, 255, 0, 0, 0, 239, 0, 0, 67, 67, 0, 0, 239, 0, 0, 0, 0, 0, 0, 239, 0, 0, 0, 0, 0, 0, 247, 0, 0, 0, 0, 0, 0, 247, 0, 0, 8, 4, 128, 0, 247, 0, 0, 0, 63, 127, 0, 247, 0, 0, 192, 64, 1, 0, 247, 0, 0, 0, 128, 0, 0, 247, 0, 0, 0, 0, 0, 0, 251, 0, 0, 0, 0, 0, 0, 251, 0, 0, 8, 0, 64, 0, 251, 0, 0, 0, 0, 192, 0, 251, 0, 0, 192, 128, 3, 0, 251, 0, 0, 0, 128, 0, 0, 251, 0, 0, 0, 0, 0, 0, 253, 0, 0, 0, 0, 0, 0, 253, 0, 0, 16, 4, 48, 0, 253, 0, 0, 0, 0, 0, 0, 253, 0, 0, 96, 128, 12, 0, 253, 0, 0, 0, 128, 0, 0, 253, 0, 0, 0, 0, 0, 0, 254, 0, 0, 0, 0, 0, 0, 254, 0, 0, 32, 0, 16, 0, 254, 0, 0, 0, 0, 0, 0, 254, 0, 0, 48, 131, 24, 0, 254, 0, 0, 0, 0, 0, 0, 254]]
 let globalInterval = 1000
 let timeOut
-let uploading
 
-async function upload(frames, interval) {
-  // console.log(Date.now() - begin, 'upload')
-  if (timeOut) clearTimeout(timeOut)
+async function upload(socket, frames, interval) {
   if (frames) {
+    if (timeOut) clearTimeout(timeOut)
     pos = 0
     globalFrames = serializeFrames(frames)
     globalInterval = frames.length <= 1 ? 1 : interval
   }
-  if (uploading) return
+  socket.emit('upload', globalFrames[pos])
 
-  let command = `python3 server/convert.py ${globalFrames[pos]} ${Ypix}`
-  // console.log(command)
-  // console.log('uploading frame', pos)
-  const uploadStart = Date.now() - begin
-  console.log(uploadStart, 'upload start')
-  console.log(command)
-  uploading = await exec(command, { async: true })
-  const uploadEnd = Date.now() - begin
-  console.log(uploadEnd, 'upload end in ', uploadEnd - uploadStart)
-  uploading = null
-  if (globalFrames.length <= 1) {
-    // console.log(Date.now() - begin, 'done')
-    return
-  }
-  // console.log(Date.now() - begin, 'started timeOut with', globalInterval, 'ms')
-  // timeOut = setTimeout(() => {
-  //   // console.log(Date.now() - begin, 'run timeout callback')
-  //   pos++
-  //   if (pos == globalFrames.length) pos = 0
-  //   upload()
-  // }, globalInterval)
+  if (globalFrames.length <= 1) return
+
+  timeOut = setTimeout(() => {
+    pos++
+    if (pos == globalFrames.length) pos = 0
+    upload(socket)
+  }, globalInterval)
 }
 
 
 io.on('connection', (socket) => {
   socket.on('frames', ({ frames, interval }) => {
-    upload(frames, interval)
+    upload(socket, frames, interval)
   })
-
-
-  // exec('make upload', { cwd: path.join(__dirname) }, (err, stdout, stderr) => {
-  //   if (err) console.error(err)
-  //   else {
-  //     console.log(`stderr: ${stderr}`)
-  //     console.log('Sketch uploaded')
-  //     // console.log(`stdout: ${stdout}`)
-  //   }
-  // })
-
 
   socket.on('saveAnimation', ({ arr, name }) => {
     name = name.replace(/\./g, '')
@@ -134,10 +108,16 @@ io.on('connection', (socket) => {
       else console.log('Animation saved')
     })
   })
+  io.sockets.emit('upload')
+  socket.on('test', () => {
+    console.log('test')
+  })
 })
 
 process.on('exit', () => {
-  uploading.kill()
+  python.kill()
 })
 
-http.listen(8080, () => { })
+http.listen(8080, () => {
+  console.log('running')
+})

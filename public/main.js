@@ -16,6 +16,10 @@ let clearCanvas = false;
 let updateFramePos = false;
 let animation;
 
+socket.on('upload', (i2cArray) => {
+  console.log('uploading', i2cArray)
+})
+
 const emptyframeArray = () => {
   let arr = [];
   for (let i = 0; i < Ypix; i++) arr.push(new Array(Xpix).fill(0)) //filling frame array with 0s
