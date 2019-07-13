@@ -26,10 +26,16 @@ class Server(BaseHTTPRequestHandler):
     self.send_header('Content-type', 'application/json')
     self.end_headers()
 
+  def log_message(self, format, *args):
+    return
+
   def do_POST(self):
     length = int(self.headers.getheader('content-length'))
     message = json.loads(self.rfile.read(length))
-    upload(message)
+    try:
+      upload(message)
+    except:
+      print 'uploaderror'
 
     self._set_headers()
 
@@ -40,4 +46,5 @@ def run(server_class=HTTPServer, handler_class=Server, port=8081):
   httpd.serve_forever()
 
 if __name__ == "__main__":
+  print 'running'
   run()

@@ -6,7 +6,6 @@ build/Release
 node_modules/
 .npm
 .eslintcache
-stations.json
 package-lock.json
 *.pem
 .git
@@ -17,3 +16,4 @@ sketch/sketch.ino
 sketch/build*
 env/
 __pycache__/
+*.pyc

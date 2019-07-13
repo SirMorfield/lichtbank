@@ -17,16 +17,16 @@ let updateFramePos = false;
 let animation;
 
 socket.on('upload', (i2cArray) => {
-  console.log('uploading', i2cArray)
+  console.log('uploading', JSON.stringify(i2cArray))
 })
 
-const emptyframeArray = () => {
-  let arr = [];
+const emptyFrameArray = () => {
+  let arr = []
   for (let i = 0; i < Ypix; i++) arr.push(new Array(Xpix).fill(0)) //filling frame array with 0s
-  return arr;
+  return arr
 }
 
-let frames = [emptyframeArray()]
+let frames = [emptyFrameArray()]
 
 const exportFrame = () => {
   socket.emit('frames', { frames, interval: getFrameInterval() });
@@ -128,7 +128,7 @@ function draw() {
   if (newFrame) {
     if (currentFrame + 1 < maxFrames) { // TODO
       currentFrame++;
-      frames.push(emptyframeArray())
+      frames.push(emptyFrameArray())
     }
     newFrame = false;
   }
