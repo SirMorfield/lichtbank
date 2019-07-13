@@ -11,13 +11,18 @@ GPIO.setup(21, GPIO.OUT)
 bus = SMBus(1)
 
 def upload(i2cBytes):
-  GPIO.output(21, GPIO.HIGH)
-  sleep(0.0001)
-  GPIO.output(21, GPIO.LOW)
-  sleep(0.0001)
+  try:
+    GPIO.output(21, GPIO.HIGH)
+    sleep(0.0001)
+    GPIO.output(21, GPIO.LOW)
+    sleep(0.0001)
 
-  for i2cByte in i2cBytes:
-    bus.write_byte(0x04, i2cByte)
+    for i2cByte in i2cBytes:
+      bus.write_byte(0x04, i2cByte)
+    return 0
+  except:
+    print 'Upload failed'
+    return 1
 
 
 class Server(BaseHTTPRequestHandler):
@@ -32,10 +37,20 @@ class Server(BaseHTTPRequestHandler):
   def do_POST(self):
     length = int(self.headers.getheader('content-length'))
     message = json.loads(self.rfile.read(length))
-    try:
-      upload(message)
-    except:
-      print 'uploaderror'
+
+    errorCounter = 0
+    while True:
+      exitcode = upload(message)
+      errorCounter = 0
+
+      if exitcode == 0:
+        break
+
+      elif exitcode == 1:
+        errorCounter += 1
+        if errorCounter > 10:
+          print "upload failed 10 times PANIC NOW"
+          break
 
     self._set_headers()
 
@@ -46,5 +61,5 @@ def run(server_class=HTTPServer, handler_class=Server, port=8081):
   httpd.serve_forever()
 
 if __name__ == "__main__":
-  print 'running'
+  print 'running python'
   run()

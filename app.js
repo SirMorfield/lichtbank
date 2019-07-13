@@ -30,5 +30,5 @@ io.on('connection', (socket) => {
 })
 
 http.listen(8080, () => {
-  console.log('running')
+  console.log('running node')
 })

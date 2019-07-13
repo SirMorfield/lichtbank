@@ -54,17 +54,21 @@ function serializeFrames(frames) {
 
 const spawn = require('child_process').spawn
 
-const python = spawn('python', ['i2c.py'], { cwd: 'server/' })
+const python = spawn('python', ['-u', 'i2c.py'], { cwd: 'server/' })
 process.on('exit', () => {
   python.kill()
 })
 
 python.stdout.on('data', (data) => {
-  console.log(`stdout: ${data}`);
+  if (data.length > 0) {
+    console.log(`stdout: ${data}`);
+  }
 })
 
 python.stderr.on('data', (data) => {
-  console.error(`stderr: ${data}`);
+  if (data.length > 0) {
+    console.error(`stderr: ${data}`);
+  }
 })
 
 const request = require('request-promise-native')
