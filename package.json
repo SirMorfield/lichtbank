@@ -1,29 +1,27 @@
 {
-  "name": "lichtbank",
-  "version": "1.0.0",
-  "description": "",
-  "main": "app.js",
-  "dependencies": {
-    "express": "^4.16.4",
-    "jsonfile": "^5.0.0",
-    "nodemon": "^1.18.6",
-    "request": "^2.88.0",
-    "request-promise-native": "^1.0.7",
-    "socket.io": "^2.1.1"
-  },
-  "devDependencies": {},
-  "scripts": {
-    "dev": "nodemon ./app.js --config configs/nodemon.json",
-    "production": "NODE_ENV=production pm2 start ./configs/app.json"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/SirMorfield/lichtbank.git"
-  },
-  "author": "Joppe Koers",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/SirMorfield/lichtbank/issues"
-  },
-  "homepage": "https://github.com/SirMorfield/lichtbank#readme"
+	"name": "lichtbank",
+	"version": "1.0.0",
+	"description": "",
+	"main": "app.js",
+	"dependencies": {
+		"express": "^4.16.4",
+		"i2c-bus": "^5.1.0",
+		"onoff": "^5.0.0",
+		"socket.io": "^2.1.1"
+	},
+	"devDependencies": {},
+	"scripts": {
+		"dev": "nodemon ./app.js --config configs/nodemon.json",
+		"production": "NODE_ENV=production pm2 start ./configs/app.json"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/SirMorfield/lichtbank.git"
+	},
+	"author": "Joppe Koers",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/SirMorfield/lichtbank/issues"
+	},
+	"homepage": "https://github.com/SirMorfield/lichtbank#readme"
 }

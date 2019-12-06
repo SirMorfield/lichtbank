@@ -1,113 +1,118 @@
+const Gpio = require('onoff').Gpio
+const pin = new Gpio(21, 'out')
+const i2c = require('i2c-bus')
+const fs = require('fs').promises
+const path = require('path')
+const root = process.file.root
+
 const Ypix = 48
 const Xpix = 48
 
-function serializeFrame(frame, log = false) {
-  let arr = [];
-  for (let column = 0; column < 8; column++) {
-    for (let panel = Ypix / 8 - 1; panel >= 0; panel--) {
-      if (panel % 2 == 1) {
-        for (let block = 0; block < 6; block++) {
-          for (let y = 0; y < 8; y++) {
-            let x = (7 - column) + (block * 8);
-            arr.push(frame[y + (panel * 8)][x]);
-          }
-        }
-      } else {
-        for (let block = 0; block < 6; block++) {
-          for (let y = 7; y >= 0; y--) {
-            let x = Xpix - 1 - (7 - column) - (block * 8);
-            arr.push(frame[y + (panel * 8)][x]);
-          }
-        }
-      }
-      for (let i = 0; i < 8; i++) {
-        if (i == column) arr.push(0);
-        else arr.push(1);
-      }
-    }
-  }
-
-  // this replaces the array of bits with an array of bytes
-  // so [1,0,0,1,1,1,0,1,1,0,0,1,1,1,0,1](16 bits) becomes [200,145](two bytes in base 10 format because js doesnt want to store bits)
-  let newArr = [];
-  for (let i = 0; i < arr.length; i += 8) {
-    let byte = '';
-    for (let bit = 0; bit < 8; bit++) {
-      byte += String(arr[bit + i]);
-    }
-    byte = parseInt(byte, 2);
-    newArr.push(byte);
-  }
-  arr = newArr;
-
-  if (log) console.log(JSON.stringify(arr));
-  return arr;
+async function getAnimation(name) {
+	let file = await fs.readFile(path.join(root, `server/animations/${name}.json`))
+	file = file.toString()
+	file = JSON.parse(file)
+	return file
 }
 
-function serializeFrames(frames) {
-  let newFrames = []
-  frames.forEach(frame => {
-    newFrames.push(serializeFrame(frame))
-  })
-  return newFrames
+async function saveAnimation(arr, name) {
+	const savePath = path.join(root, `server/animations/${name}.json`)
+
+	arr = arr.map(serializeFrame)
+	await fs.writeFile(savePath, JSON.stringify(arr))
 }
 
-const spawn = require('child_process').spawn
+function serializeFrame(frame) {
+	let bitArray = []
+	for (let column = 0; column < 8; column++) {
+		for (let panel = Ypix / 8 - 1; panel >= 0; panel--) {
+			if (panel % 2 == 1) {
+				for (let block = 0; block < 6; block++) {
+					for (let y = 0; y < 8; y++) {
+						let x = (7 - column) + (block * 8)
+						bitArray.push(frame[y + (panel * 8)][x])
+					}
+				}
+			} else {
+				for (let block = 0; block < 6; block++) {
+					for (let y = 7; y >= 0; y--) {
+						let x = Xpix - 1 - (7 - column) - (block * 8)
+						bitArray.push(frame[y + (panel * 8)][x])
+					}
+				}
+			}
+			for (let i = 0; i < 8; i++) {
+				if (i == column) bitArray.push(0)
+				else bitArray.push(1)
+			}
+		}
+	}
 
-const python = spawn('python', ['-u', 'i2c.py'], { cwd: 'server/' })
-process.on('exit', () => {
-  python.kill()
-})
+	// this replaces the array of bits with an array of bytes
+	// so [1,0,0,1,1,1,0,1,1,0,0,1,1,1,0,1](16 bits) becomes [200,145](two bytes in base 10 format because js doesnt want to store bits)
+	let byteArray = [];
+	for (let i = 0; i < bitArray.length; i += 8) {
+		let byte = '';
+		for (let bit = 0; bit < 8; bit++) {
+			byte += String(bitArray[bit + i]);
+		}
+		byte = parseInt(byte, 2);
+		byteArray.push(byte);
+	}
 
-python.stdout.on('data', (data) => {
-  if (data.length > 0) {
-    console.log(`stdout: ${data}`);
-  }
-})
+	return byteArray;
+}
 
-python.stderr.on('data', (data) => {
-  if (data.length > 0) {
-    console.error(`stderr: ${data}`);
-  }
-})
+async function sendPulse() {
+	for (let i = 1; i >= 0; i++) {
+		await new Promise((resolve) => {
+			pin.write(i, (err) => {
+				if (err) console.log(err)
+				resolve()
+			})
+		})
+		await new Promise((resolve) => setTimeout(resolve, 0.001))
+	}
+}
 
-const request = require('request-promise-native')
-async function sendToPython(frames) {
-  const options = {
-    url: 'http://localhost:8081',
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(frames)
-  }
-  const { err, response, body } = await request(options)
-  if (err) console.error(err)
+let i2cArduino
+async function sendToArduino(bytes) {
+	if (!i2cArduino) i2cArduino = await i2c.openPromisified(1)
+	await sendPulse()
+	for (const byte of bytes) {
+		await i2c1.writeByte(0x04, byte)
+	}
 }
 
 let pos = 0
-let globalFrames = [[0, 0, 0, 0, 0, 0, 127, 0, 0, 0, 0, 0, 0, 127, 0, 96, 4, 8, 0, 0, 127, 0, 0, 127, 0, 0, 0, 127, 0, 24, 128, 48, 0, 0, 127, 0, 0, 0, 0, 0, 0, 127, 0, 0, 0, 0, 0, 0, 191, 0, 0, 0, 0, 0, 0, 191, 0, 192, 4, 8, 0, 0, 191, 0, 0, 0, 0, 0, 0, 191, 0, 6, 0, 32, 0, 0, 191, 0, 0, 0, 0, 0, 0, 191, 0, 0, 0, 0, 0, 0, 223, 0, 0, 0, 0, 0, 0, 223, 0, 128, 8, 8, 0, 0, 223, 0, 0, 0, 0, 0, 0, 223, 0, 3, 64, 64, 0, 0, 223, 0, 0, 0, 0, 0, 0, 223, 0, 0, 0, 0, 0, 0, 239, 0, 0, 0, 0, 0, 0, 239, 0, 0, 8, 4, 0, 0, 239, 0, 255, 255, 0, 0, 0, 239, 0, 0, 67, 67, 0, 0, 239, 0, 0, 0, 0, 0, 0, 239, 0, 0, 0, 0, 0, 0, 247, 0, 0, 0, 0, 0, 0, 247, 0, 0, 8, 4, 128, 0, 247, 0, 0, 0, 63, 127, 0, 247, 0, 0, 192, 64, 1, 0, 247, 0, 0, 0, 128, 0, 0, 247, 0, 0, 0, 0, 0, 0, 251, 0, 0, 0, 0, 0, 0, 251, 0, 0, 8, 0, 64, 0, 251, 0, 0, 0, 0, 192, 0, 251, 0, 0, 192, 128, 3, 0, 251, 0, 0, 0, 128, 0, 0, 251, 0, 0, 0, 0, 0, 0, 253, 0, 0, 0, 0, 0, 0, 253, 0, 0, 16, 4, 48, 0, 253, 0, 0, 0, 0, 0, 0, 253, 0, 0, 96, 128, 12, 0, 253, 0, 0, 0, 128, 0, 0, 253, 0, 0, 0, 0, 0, 0, 254, 0, 0, 0, 0, 0, 0, 254, 0, 0, 32, 0, 16, 0, 254, 0, 0, 0, 0, 0, 0, 254, 0, 0, 48, 131, 24, 0, 254, 0, 0, 0, 0, 0, 0, 254]]
+let globalFrames = 1
 let globalInterval = 1000
 let timeOut
 
 async function upload(frames, interval, socket) {
-  if (frames) {
-    if (timeOut) clearTimeout(timeOut)
-    pos = 0
-    globalFrames = serializeFrames(frames)
-    globalInterval = frames.length <= 1 ? 1 : interval
-  }
+	if (frames) {
+		if (timeOut) clearTimeout(timeOut)
+		pos = 0
+		globalFrames = frames.map(serializeFrame)
+		globalInterval = frames.length <= 1 ? 1 : interval
+	}
 
-  await sendToPython(globalFrames[pos])
+	await sendToArduino(globalFrames[pos])
 
-  if (socket) socket.emit('upload', globalFrames[pos])
+	if (socket) socket.emit('upload', globalFrames[pos])
 
-  // do not start loop if there is only 1 frame
-  if (globalFrames.length <= 1) return
+	// do not start loop if there is only 1 frame
+	if (globalFrames.length <= 1) return
 
-  timeOut = setTimeout(() => {
-    pos++
-    if (pos == globalFrames.length) pos = 0
-    upload()
-  }, globalInterval)
+	timeOut = setTimeout(() => {
+		pos++
+		if (pos == globalFrames.length) pos = 0
+		upload()
+	}, globalInterval)
 }
 
-exports.upload = upload
+exports = {
+	getAnimation,
+	saveAnimation,
+	upload
+}
