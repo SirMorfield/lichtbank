@@ -1,0 +1,10 @@
+default baund
+380 ms / upload
+
+standard baundrate, average 20 uploads, 366 bytes each
+js		1.351 ms/byte, 494.5 ms total
+python
+
+727000 baundrate, average 20 uploads, 366 bytes each
+js		1.262 ms/byte, 462.2 ms total
+python

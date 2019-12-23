@@ -1,7 +1,9 @@
 #!/bin/bash
-echo "uploading sketch/build-uno/sketch.hex"
-make -s -C sketch/ | egrep "Device|Program|Data|error"
-avrdude -p m328p -c gpio -e -U flash:w:sketch/build-uno/sketch.hex
-echo "cleaning"
-rm -rf sketch/build-uno
-echo "done"
+make -s -C sketch/
+
+sudo sh -c "echo 8 > /sys/class/gpio/unexport"
+sudo sh -c "echo 10 > /sys/class/gpio/unexport"
+sudo sh -c "echo 11 > /sys/class/gpio/unexport"
+sudo sh -c "echo 9 > /sys/class/gpio/unexport"
+
+sudo avrdude -p m328p -C pi.conf -c linuxgpio -e -U flash:w:sketch/build-uno/sketch.hex
