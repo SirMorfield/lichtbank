@@ -1,24 +1,9 @@
-const fs = require('fs').promises
-const path = require('path')
-const root = process.env.root
-const send = require('./send.js')
-
 const Ypix = 48
 const Xpix = 48
 
-async function getAnimation(name) {
-	let file = await fs.readFile(path.join(root, `server/animations/${name}.json`))
-	file = file.toString()
-	file = JSON.parse(file)
-	return file
-}
+const writeToArduino = require('./writeToArduino.js')
 
-async function saveAnimation(arr, name) {
-	const savePath = path.join(root, `server/animations/${name}.json`)
-
-	arr = arr.map(serializeFrame)
-	await fs.writeFile(savePath, JSON.stringify(arr))
-}
+const frameDB = require('./frameDB.js')
 
 function serializeFrame(frame) {
 	let bitArray = []
@@ -61,35 +46,31 @@ function serializeFrame(frame) {
 	return byteArray;
 }
 
-let pos = 0
-let globalFrames
-let globalInterval = 1000
-let timeOut
+let timeout
+async function playAnimation(frames, interval, framePos = 0) {
+	if (timeout) clearTimeout(timeOut)
+	await writeToArduino(frames[framePos])
 
-async function upload(frames, interval, socket) {
-	if (frames) {
-		if (timeOut) clearTimeout(timeOut)
-		pos = 0
-		globalFrames = frames.map(serializeFrame)
-		globalFrames = frames
-		globalInterval = frames.length <= 1 ? 1 : interval
-	}
+	await new Promise((resolve) => setTimeout(resolve, interval))
 
-	await send(globalFrames[pos])
+	framePos = framePos === frames.length - 1 ? 0 : framePos + 1
+	playAnimation(frames, interval, framePos)
+}
 
-	if (socket) socket.emit('upload', globalFrames[pos])
-
-	// do not start loop if there is only 1 frame
-	if (globalFrames.length <= 1) return
-
-	timeOut = setTimeout(() => {
-		if (++pos == globalFrames.length) pos = 0
-		upload()
-	}, globalInterval)
+let analogs
+async function writeTimeFrame(timeStamp = Date.now()) {
+	const d = new Date(timeStamp)
+	let line = (d.getHours() * 60) + d.getMinutes()
+	if (line > 720) line = line - 720
+	if (!analogs) analogs = await frameDB.getAnalogs(Xpix)
+	const frame = serializeFrame(analogs[line])
+	await writeToArduino(frame)
 }
 
 module.exports = {
-	getAnimation,
-	saveAnimation,
-	upload
+	frameDB,
+	writeToArduino,
+	serializeFrame,
+	playAnimation,
+	writeTimeFrame
 }

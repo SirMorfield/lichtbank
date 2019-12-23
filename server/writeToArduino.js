@@ -1,3 +1,5 @@
+const EventEmitter = require('events')
+
 const Gpio = require('onoff').Gpio
 const resetPin = new Gpio(21, 'out')
 const i2c = require('i2c-bus')
@@ -8,7 +10,7 @@ async function writeByte(byte) {
 		await Arduino.i2cWrite(arduinoAddress, 1, Buffer.from([byte]))
 		return 0
 	} catch (err) {
-		console.error(err)
+		console.error('i2c error', err)
 		return { error: err }
 	}
 }
@@ -17,7 +19,7 @@ async function write(value) {
 	return new Promise((resolve) => {
 		resetPin.write(value, (err) => {
 			if (err) {
-				console.error(err)
+				console.error('gpio error', err)
 				resolve({ error: err })
 			}
 			resolve(0)
@@ -26,8 +28,20 @@ async function write(value) {
 }
 
 let Arduino
-async function sendToArduino(bytes) {
-	if (!Arduino) Arduino = await i2c.openPromisified(1)
+let isWriting = false
+class Writer extends EventEmitter { }
+const writer = new Writer()
+writer.setMaxListeners(30)
+
+async function writeToArduino(bytes) {
+	if (isWriting) {
+		await new Promise((resolve) => writer.on('writeDone', resolve))
+		return await write(varName, int)
+	}
+	isWriting = true
+	try {
+		if (!Arduino) Arduino = await i2c.openPromisified(1)
+	} catch (err) { console.error('i2c open error', err) }
 
 	await write(1)
 	await new Promise((resolve) => setTimeout(resolve, 0.001))
@@ -37,6 +51,9 @@ async function sendToArduino(bytes) {
 	for (const byte of bytes) {
 		await writeByte(byte)
 	}
+
+	isWriting = false
+	writer.emit('writeDone')
 }
 
-module.exports = sendToArduino
+module.exports = writeToArduino
