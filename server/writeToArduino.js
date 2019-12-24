@@ -35,8 +35,9 @@ writer.setMaxListeners(30)
 
 async function writeToArduino(bytes) {
 	if (isWriting) {
+		// console.log('isWriting')
 		await new Promise((resolve) => writer.on('writeDone', resolve))
-		return await write(varName, int)
+		return await write(bytes)
 	}
 	isWriting = true
 	try {
@@ -44,9 +45,10 @@ async function writeToArduino(bytes) {
 	} catch (err) { console.error('i2c open error', err) }
 
 	await write(1)
-	await new Promise((resolve) => setTimeout(resolve, 0.001))
+	// Node is slow enough, no delay necessary
+	// await new Promise((resolve) => setTimeout(resolve, 0.001))
 	await write(0)
-	await new Promise((resolve) => setTimeout(resolve, 0.001))
+	// await new Promise((resolve) => setTimeout(resolve, 0.001))
 
 	for (const byte of bytes) {
 		await writeByte(byte)

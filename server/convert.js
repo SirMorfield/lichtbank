@@ -2,7 +2,6 @@ const Ypix = 48
 const Xpix = 48
 
 const writeToArduino = require('./writeToArduino.js')
-
 const frameDB = require('./frameDB.js')
 
 function serializeFrame(frame) {
@@ -60,11 +59,18 @@ async function playAnimation(frames, interval, framePos = 0) {
 let analogs
 async function writeTimeFrame(timeStamp = Date.now()) {
 	const d = new Date(timeStamp)
-	let line = (d.getHours() * 60) + d.getMinutes()
-	if (line > 720) line = line - 720
+	let minsIntoDay = ((d.getHours() + 1) * 60) + d.getMinutes()
+	let index = minsIntoDay % 720
+	// console.log(d.getHours(), d.getMinutes(), minsIntoDay, index)
 	if (!analogs) analogs = await frameDB.getAnalogs(Xpix)
-	const frame = serializeFrame(analogs[line])
+	const frame = serializeFrame(analogs[index])
 	await writeToArduino(frame)
+}
+
+async function loadSketch(id) {
+	let animation = await frameDB.getAnimation(id)
+	animation = animation.map(serializeFrame)
+	await writeToArduino(animation[0])
 }
 
 module.exports = {
@@ -72,5 +78,6 @@ module.exports = {
 	writeToArduino,
 	serializeFrame,
 	playAnimation,
-	writeTimeFrame
+	writeTimeFrame,
+	loadSketch
 }

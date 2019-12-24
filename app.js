@@ -6,9 +6,7 @@ const io = require('socket.io')(http)
 process.env.root = __dirname
 
 const convert = require('./server/convert.js')
-convert.getAnimation('standard')
-	.then((frames) => convert.upload(frames))
-
+convert.loadSketch('standard')
 app.use(express.static(path.join(__dirname, 'public/')))
 
 app.get('/', (req, res) => {
