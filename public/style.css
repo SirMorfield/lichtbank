@@ -9,19 +9,12 @@ body{
 	/* outline: 5px solid rgba(10, 10, 10, 1); */
 	background-color:rgba(90, 90, 90, 1) ;
 }
-.button{
-  /* font-size: 13px;
-  padding-top: 10px;
-  padding-bottom: 10px;
-  width: 100px;
-  margin: 10px; */
-}
 
-#bold{
+.bold{
   font-weight: bold;
 }
 
-.grid {
+#grid {
   display: grid;
   position: absolute;
   right: 20px;
@@ -30,80 +23,103 @@ body{
   grid-auto-rows: minmax(20px, auto);
 }
 
-.resetAll {
+#resetAll {
   grid-column: 1 / 3;
   grid-row: 1;
-  padding: 10px;
+  height: 45px;
 }
 
-.export {
+#export {
   grid-column: 1 / 3;
   grid-row: 2;
-  padding: 10px;
+  height: 45px;
 }
 
-.newFrame {
+#newFrame {
   grid-column: 1 / 3;
   grid-row: 3;
-  padding: 10px;
+  height: 45px;
 }
 
-.saveAnimation{
+#saveAnimation{
   grid-column: 1 / 3;
   grid-row: 4;
-  padding: 10px;
+  height: 45px;
 }
 
-.disablePixel {
+#disablePixel {
   grid-column: 1;
   grid-row: 5;
-  padding: 10px;
+  height: 45px;
 }
 
-.enablePixel {
+#enablePixel {
   grid-column: 2;
   grid-row:5;
-  padding: 10px;
+  height: 45px;
 }
 
-.prevFrame{
+#disablePixel{
   grid-column: 1;
   grid-row:6;
-  padding: 10px;
+  height: 45px;
 }
 
-.nextFrame{
+#nextFrame{
   grid-column: 2;
   grid-row:6;
-  padding: 10px;
+  height: 45px;
 }
 
-.numberFrames {
+#numberFrames {
   grid-column: 1 / 3;
   grid-row: 7;
-  padding: 10px;
+  height: 45px;
 }
 
 #matrixPos{
   grid-column: 1/3;
   grid-row: 8;
-  padding: 10px;
+  height: 45px;
 }
 
-.frameTime{
+#frameTime{
   grid-column: 1/3;
   grid-row: 9;
-  padding: 10px;
+  /* padding: 10px 0 10px 10px; */
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.playAnimation{
+#frameTimeVal{
+	height: 80%;
+	width: 30%;
+}
+
+#playAnimation{
   grid-column: 1/3;
   grid-row: 10;
-  padding: 10px;
+  height: 45px;
 }
 
-.stopAnimation{
+#stopAnimation{
   grid-column: 1/3;
   grid-row: 11;
-  padding: 10px;
+  height: 45px;
+}
+
+#brushSize{
+	grid-column: 1/3;
+	grid-row: 12;
+	height: 45px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+#brushSizeVal{
+	height: 80%;
+	width: 30%;
 }
