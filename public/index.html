@@ -3,33 +3,35 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <link rel="stylesheet" href="/libs/normalize.css">
-  <link rel="stylesheet" href="/style.css">
-  <title>Dotmatrix display</title>
-  <script src="/libs/socket.io.min.js"></script>
-  <script src="/libs/p5.min.js"></script>
-  <script src="/main.js"></script>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<link rel="stylesheet" href="/libs/normalize.css">
+	<link rel="stylesheet" href="/style.css">
+	<title>Dotmatrix display</title>
+	<script src="/libs/socket.io.min.js"></script>
+	<script src="/libs/p5.min.js"></script>
+	<script src="/main.js"></script>
 </head>
 
 <body>
-  <div class="grid">
-    <button onclick="location.reload()" class="resetAll">Reset All</button>
-    <button onclick="exportFrame()" class="export">Export to dotmatrix display</button>
-    <button onclick="makeNewFrame()" class="newFrame">New Frame</button>
-    <button class="saveAnimation" onclick="saveAnimation()"> Save Animation</button>
-    <button onclick="pixel = 0; makeButtonBold(0)" class="pixel disablePixel" id="1">Disable Pixel</button>
-    <button onclick="pixel = 1; makeButtonBold(1)" class="pixel enablePixel" id="bold">Enable Pixel</button>
-    <button class="prevFrame" onclick=" otherFrame(-1)"> Previous frame</button>
-    <button class="nextFrame" onclick=" otherFrame(1)">Next frame</button>
-    <div id="numberFrames" class="numberFrames"></div>
-    <div id="matrixPos">Postition: (, )</div>
-    <div class="frameTime">Time Between Frames (sec) <input type="text" value="1" id="frameTimeVal" style="width: 30%"></div>
-    <button class="playAnimation" onclick="playAnimation()">Play</button>
-    <button class="stopAnimation" onclick="clearInterval(animation)">Stop</button>
-  </div>
+	<div class="grid">
+		<button onclick="location.reload()" class="resetAll">Reset All</button>
+		<button onclick="exportFrame()" class="export">Export to dotmatrix display</button>
+		<button onclick="makeNewFrame()" class="newFrame">New Frame</button>
+		<button class="saveAnimation" onclick="saveAnimation()"> Save Animation</button>
+		<button onclick="pixel = 0; makeButtonBold(0)" class="pixel disablePixel" id="1">Disable Pixel</button>
+		<button onclick="pixel = 1; makeButtonBold(1)" class="pixel enablePixel" id="bold">Enable Pixel</button>
+		<button class="prevFrame" onclick=" otherFrame(-1)"> Previous frame</button>
+		<button class="nextFrame" onclick=" otherFrame(1)">Next frame</button>
+		<div id="numberFrames" class="numberFrames"></div>
+		<div id="matrixPos">Postition: (, )</div>
+		<div class="frameTime">Time Between Frames (sec) <input type="text" value="1" id="frameTimeVal" style="width: 30%"></div>
+		<button class="playAnimation" onclick="playAnimation()">Play</button>
+		<button class="stopAnimation" onclick="clearInterval(animation)">Stop</button>
+		<div class="brushSize">Brush size <input type="text" value="1" id="brushSizeVal" style="width: 30%"></div>
+
+	</div>
 </body>
 
 </html>

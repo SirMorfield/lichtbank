@@ -1,8 +1,14 @@
 body{
   margin: 10px;
   cursor: pointer;
+  background-color:rgba(50, 50, 50, 1);
+  color: white;
 }
 
+#defaultCanvas0 {
+	/* outline: 5px solid rgba(10, 10, 10, 1); */
+	background-color:rgba(90, 90, 90, 1) ;
+}
 .button{
   /* font-size: 13px;
   padding-top: 10px;

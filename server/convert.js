@@ -1,8 +1,15 @@
-const Ypix = 48
-const Xpix = 48
-
 const writeToArduino = require('./writeToArduino.js')
 const frameDB = require('./frameDB.js')
+
+const Ypix = 48
+const Xpix = 48
+const uploadDuration = 300
+
+let analogs
+async function init() {
+	analogs = await frameDB.getAnalogs(Xpix)
+	analogs = analogs.map(serializeFrame)
+}
 
 function serializeFrame(frame) {
 	let bitArray = []
@@ -30,8 +37,6 @@ function serializeFrame(frame) {
 		}
 	}
 
-	// this replaces the array of bits with an array of bytes
-	// so [1,0,0,1,1,1,0,1,1,0,0,1,1,1,0,1](16 bits) becomes [200,145](two bytes in base 10 format because js doesnt want to store bits)
 	let byteArray = [];
 	for (let i = 0; i < bitArray.length; i += 8) {
 		let byte = ''
@@ -45,39 +50,59 @@ function serializeFrame(frame) {
 	return byteArray;
 }
 
-let timeout
-async function playAnimation(frames, interval, framePos = 0) {
-	if (timeout) clearTimeout(timeOut)
-	await writeToArduino(frames[framePos])
+let writeTimeTimeout
+async function writeTime(loop = false, timeStamp = Date.now()) {
+	if (writeTimeTimeout) clearTimeout(writeTimeTimeout)
 
-	await new Promise((resolve) => setTimeout(resolve, interval))
-
-	framePos = framePos === frames.length - 1 ? 0 : framePos + 1
-	playAnimation(frames, interval, framePos)
-}
-
-let analogs
-async function writeTimeFrame(timeStamp = Date.now()) {
 	const d = new Date(timeStamp)
 	let minsIntoDay = ((d.getHours() + 1) * 60) + d.getMinutes()
 	let index = minsIntoDay % 720
-	// console.log(d.getHours(), d.getMinutes(), minsIntoDay, index)
-	if (!analogs) analogs = await frameDB.getAnalogs(Xpix)
-	const frame = serializeFrame(analogs[index])
-	await writeToArduino(frame)
+	await writeToArduino(analogs[index])
+
+	if (loop) {
+		writeTimeTimeout = setTimeout(() => {
+			writeTime(true)
+		}, 10000 - uploadDuration)
+	}
 }
 
-async function loadSketch(id) {
-	let animation = await frameDB.getAnimation(id)
-	animation = animation.map(serializeFrame)
-	await writeToArduino(animation[0])
+async function playAnimation(bytes, interval, framePos = 0) {
+	await writeToArduino(bytes[framePos])
+
+	if (bytes.length > 1) {
+		if (++framePos > serializedFrames.length - 1) framePos = 0
+		animationTimeout = setTimeout(() => {
+			playAnimation(bytes, interval, framePos)
+		}, interval);
+	}
+}
+
+let animationTimeout
+async function loadAnimation({ id, frames, serializedFrames, interval = 0, framePos = 0 }) {
+	if (animationTimeout) clearTimeout(timeOut)
+
+	if (id) {
+		serializedFrames = await frameDB.getAnimation(id)
+		serializedFrames = serializedFrames.map(serializeFrame)
+	}
+	if (frames) {
+		serializedFrames = frames.map(serializeFrame)
+	}
+
+	await writeToArduino(serializedFrames[framePos])
+
+	if (serializedFrames.length > 1) {
+		if (++framePos > serializedFrames.length - 1) framePos = 0
+		animationTimeout = setTimeout(() => {
+			playAnimation({ serializedFrames, interval, framePos })
+		}, interval);
+	}
 }
 
 module.exports = {
+	init,
 	frameDB,
 	writeToArduino,
-	serializeFrame,
-	playAnimation,
-	writeTimeFrame,
-	loadSketch
+	writeTime,
+	loadAnimation
 }
