@@ -1,5 +1,4 @@
 const EventEmitter = require('events')
-
 const Gpio = require('onoff').Gpio
 const resetPin = new Gpio(21, 'out')
 const i2c = require('i2c-bus')

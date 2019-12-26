@@ -36,7 +36,7 @@ frames[0] = getEmptyFrame()
 const socket = io()
 function saveAnimation() {
 	let obj = {
-		arr: frames,
+		frames,
 		name: prompt('Filename to save', 'Only letters'),
 		interval: getFrameInterval()
 	}
@@ -56,7 +56,6 @@ function updateBrushSize() {
 	if (input.replace('.', '').match(/\D/i)) {
 		brushSizeVal.value = 1
 		brushSize = 1
-		console.log(1)
 		return
 	}
 	input = parseInt(input)

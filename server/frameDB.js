@@ -3,51 +3,31 @@ const path = require('path')
 const root = __dirname
 
 async function getAnimation(name) {
-	let file = await fs.readFile(path.join(root, `animations/${name}`))
+	let file = await fs.readFile(path.join(root, `animations/${name}.json`))
 	file = file.toString()
 	file = JSON.parse(file)
 	return file
 }
 
-async function saveAnimation(arr, name) {
-	const savePath = path.join(root, `animations/${name}`)
+async function saveAnimation(animation) {
+	const savePath = path.join(root, `animations/${name}.json`)
+	animation.name = animation.name.replace(/\s/g, '_')
+	animation.name = animation.name.replace(/\\/g, '')
 
-	await fs.writeFile(savePath, JSON.stringify(arr))
+	await fs.writeFile(savePath, JSON.stringify(animation))
 }
 
-function splitInChunks(str, len) {
-	const size = Math.ceil(str.length / len)
-	const r = Array(size)
-	let offset = 0
-
-	for (let i = 0; i < size; i++) {
-		r[i] = str.substr(offset, len)
-		offset += len
-	}
-	return r
-}
-
-async function getAnalogs(Xpix) {
+async function getClock() {
 	let analogs = await fs.readFile(path.join(root, 'animations/clock/analog'))
 	analogs = analogs.toString()
-	analogs = analogs.split('\n')
 
-
-	// converting bitstring ('11110101011011') to a 2d array
-	analogs = analogs.map((analog) => {
-		analog = splitInChunks(analog, Xpix)
-		analog = analog.map((row) => {
-			row = row.split('')
-			row = row.map((bit) => parseInt(bit))
-			return row
-		})
-		return analog
-	})
-	return analogs
+	return {
+		analogs
+	}
 }
 
 module.exports = {
 	getAnimation,
 	saveAnimation,
-	getAnalogs
+	getClock
 }

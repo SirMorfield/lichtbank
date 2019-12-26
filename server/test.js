@@ -1,2 +1,1 @@
-const convert = require('./convert.js')
-convert.writeTimeFrame()
+const convert = require('./convert.js')()
