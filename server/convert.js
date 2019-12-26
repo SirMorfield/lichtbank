@@ -5,7 +5,7 @@ module.exports = async () => {
 
 	const frameDB = require('./frameDB.js')
 
-	const isPi = require('detect-pi')()
+	const isPi = require('detect-rpi')()
 	let writeToArduino
 	if (!isPi) {
 		writeToArduino = new Promise((resolve) => {
@@ -51,7 +51,7 @@ module.exports = async () => {
 			byteArray.push(byte)
 		}
 
-		return byteArray;
+		return byteArray
 	}
 
 	function stringToFrame(string) {
@@ -97,17 +97,18 @@ module.exports = async () => {
 		if (loop) {
 			writeTimeTimeout = setTimeout(() => {
 				writeTime(true)
-			}, 10000 - uploadDuration)
+			}, Math.max(0, 10000 - uploadDuration / 2))
 		}
 	}
 
 	let animationTimeout
-	async function loadAnimation({ id, frames, serializedFrames, interval = 0, framePos = 0 }) {
-		if (animationTimeout) clearTimeout(timeOut)
+	async function loadAnimation({ id, frames, serializedFrames, interval = 0, private = false, framePos = 0 }) {
+		if (animationTimeout) clearTimeout(animationTimeout)
 
 		if (id) {
-			serializedFrames = await frameDB.getAnimation(id)
-			serializedFrames = serializedFrames.map(serializeFrame)
+			let animation = await frameDB.getAnimation(id, private)
+			frames = animation.frames
+			interval = animation.interval
 		}
 		if (frames) {
 			serializedFrames = frames.map(serializeFrame)
@@ -119,7 +120,7 @@ module.exports = async () => {
 			if (++framePos > serializedFrames.length - 1) framePos = 0
 			animationTimeout = setTimeout(() => {
 				loadAnimation({ serializedFrames, interval, framePos })
-			}, interval);
+			}, Math.max(0, interval - uploadDuration / 2));
 		}
 	}
 

@@ -7,7 +7,7 @@ body{
 
 #defaultCanvas0 {
 	/* outline: 5px solid rgba(10, 10, 10, 1); */
-	background-color:rgba(90, 90, 90, 1) ;
+	background-color:rgba(90, 90, 90, 1);
 }
 
 .bold{
@@ -18,7 +18,7 @@ body{
   display: grid;
   position: absolute;
   right: 20px;
-  grid-template-columns: repeat(2, 150px);
+  grid-template-columns: repeat(2, 155px);
   grid-gap: 5px;
   grid-auto-rows: minmax(20px, auto);
 }
@@ -59,10 +59,10 @@ body{
   height: 45px;
 }
 
-#disablePixel{
-  grid-column: 1;
-  grid-row:6;
-  height: 45px;
+#prevFrame{
+	grid-column: 1;
+	grid-row:6;
+	height: 45px;
 }
 
 #nextFrame{
@@ -75,18 +75,21 @@ body{
   grid-column: 1 / 3;
   grid-row: 7;
   height: 45px;
+  display: flex;
+  align-items: center;
 }
 
 #matrixPos{
   grid-column: 1/3;
   grid-row: 8;
   height: 45px;
+  display: flex;
+  align-items: center;
 }
 
 #frameTime{
   grid-column: 1/3;
   grid-row: 9;
-  /* padding: 10px 0 10px 10px; */
   height: 45px;
   display: flex;
   align-items: center;
@@ -96,6 +99,7 @@ body{
 #frameTimeVal{
 	height: 80%;
 	width: 30%;
+	text-align:center;
 }
 
 #playAnimation{
@@ -122,4 +126,34 @@ body{
 #brushSizeVal{
 	height: 80%;
 	width: 30%;
+	text-align:center;
+}
+
+#console{
+	padding:5px;
+	grid-column: 1/3;
+	grid-row: 13;
+	height: 270px;
+	background-color:rgba(90, 90, 90, 1);
+	overflow-y: scroll;
+	overflow-x: hidden;
+}
+
+#loadSavedAnimation{
+	grid-column: 1/3;
+	grid-row: 14;
+	height: 45px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+#loadSavedAnimationSelect{
+	height: 90%;
+	width: 70%;
+}
+
+#loadSavedAnimationButton{
+	height: 90%;
+	width: 80px;
 }

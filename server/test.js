@@ -1,1 +1,0 @@
-const convert = require('./convert.js')()

@@ -9,7 +9,7 @@ const pixSize = xSize / Xpix
 const colors = {
 	red: 'rgb(255, 0, 0)',
 	lightRed: 'rgb(255, 165, 165)',
-	white: 'rgb(255, 255, 255)'
+	white: 'rgb(90, 90, 90)'
 }
 
 let currentFrame = 0
@@ -17,7 +17,11 @@ let currentFrame = 0
 let pixelVal = 1 // pixel on or off
 let clearCanvas = false
 let brushSize = 1
-let printPreviousFrame = false
+let printFrame = {
+	print: false,
+	color: colors.red,
+	framesIndex: 0
+}
 let frames = []
 
 function getEmptyFrame() {
@@ -33,20 +37,10 @@ function getEmptyFrame() {
 
 frames[0] = getEmptyFrame()
 
-const socket = io()
-function saveAnimation() {
-	let obj = {
-		frames,
-		name: prompt('Filename to save', 'Only letters'),
-		interval: getFrameInterval()
-	}
-	socket.emit('saveAnimation', obj)
-}
-
 function updatePixelVal(val) {
 	pixelVal = val
-	document.getElementById('enablePixel').class = val === 1 ? 'bold' : ''
-	document.getElementById('disablePixel').class = val === 0 ? 'bold' : ''
+	document.getElementById('enablePixel').className = val === 0 ? 'bold' : ''
+	document.getElementById('disablePixel').className = val === 1 ? 'bold' : ''
 }
 
 const maxBrushSize = Math.max(Xpix, Ypix)
@@ -74,7 +68,7 @@ function getFrameInterval() {
 	if (interval.replace('.', '').match(/\D/i)) return 700
 	interval = interval.replace(/\,/g, '.')
 	interval = parseFloat(interval)
-	if (interval < 0.05) return 700
+	// if (interval < 0.05) return 1000
 
 	interval *= 1000
 	return interval
@@ -82,34 +76,40 @@ function getFrameInterval() {
 
 function showOtherFrame(direction) {
 	let newFrame = currentFrame + direction
-	if (newFrame > frames.length - 1) newFrame = 0
-	if (newFrame < 0) newFrame = frames.length - 1
+	if (newFrame > frames.length - 1) return
+	if (newFrame < 0) return
 	currentFrame = newFrame
-	// currentFrame = Math.max(0, Math.min(frames.length - 1, framePos + direction))
 
-	clearCanvas = true
+	printFrame = {
+		print: true,
+		color,
+		index: newFrame
+	}
 }
 
 let animationInterval
 function playAnimation() {
 	if (animationInterval) clearInterval(animationInterval)
-
+	showOtherFrame(currentFrame + 1 % frames.length)
 	let interval = getFrameInterval()
 	animationInterval = setInterval(() => {
-		showOtherFrame(1)
+		showOtherFrame(currentFrame + 1 % frames.length, colors.red)
 	}, interval)
 }
 
 function stopAnimation() {
-	clearInterval(animationInterval)
+	if (animationInterval) clearInterval(animationInterval)
 }
 
 function makeNewFrame() {
 	frames.push(getEmptyFrame())
-	clearCanvas = true
+	printFrame = {
+		print: true,
+		color: colors.lightRed,
+		index: currentFrame
+	}
 	currentFrame++
-	printPreviousFrame = true
-	document.getElementById('numberFrames').innerHTML = `Frame:  ${currentFrame}`
+	document.getElementById('numberFrames').innerHTML = `Frame: ${currentFrame + 1} / ${frames.length}`
 }
 
 function setup() {
@@ -119,23 +119,18 @@ function setup() {
 }
 
 function draw() {
-	if (clearCanvas) {
+	if (printFrame.print) {
 		clear()
-		clearCanvas = false
-	}
+		fill(printFrame.color)
 
-	if (printPreviousFrame) {
-		fill(colors.lightRed)
-
-		let previousFrame = frames[currentFrame - 1]
 		for (let y = 0; y < Ypix; y++) {
 			for (let x = 0; x < Xpix; x++) {
-				if (previousFrame[y][x] === 1) {
+				if (frames[printFrame.index][y][x] === 1) {
 					ellipse(x * scale + (0.5 * pixSize), y * scale + (0.5 * pixSize), pixSize)
 				}
 			}
 		}
-		printPreviousFrame = false
+		printFrame.print = false
 	}
 
 	let x = Math.round(mouseX / scale)
@@ -153,8 +148,7 @@ function draw() {
 				frames[currentFrame][y][x] = pixelVal
 
 				ellipse(x * scale + (0.5 * pixSize), y * scale + (0.5 * pixSize), pixSize)
-			}
-			else {
+			} else {
 				let left = Math.floor(brushSize / 2)
 				let right = Math.ceil(brushSize / 2)
 

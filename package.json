@@ -8,6 +8,7 @@
 		"express": "^4.16.4",
 		"i2c-bus": "^5.1.0",
 		"onoff": "^5.0.0",
+		"sanitize-filename": "^1.6.3",
 		"socket.io": "^2.1.1"
 	},
 	"devDependencies": {},
