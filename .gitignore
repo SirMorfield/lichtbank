@@ -1,11 +1,7 @@
-*.log
-npm-debug.log*
 .DS_Store*
-.node-persist/
 node_modules/
-.npm
-.git
 temp.json
 temp.js
 .vscode/
 build-uno/
+server/frames/public/

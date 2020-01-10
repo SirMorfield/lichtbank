@@ -16,9 +16,10 @@
 	})
 
 	io.on('connection', (socket) => {
-		socket.on('loadAnimation', async ({ frames, interval }) => {
-			await convert.loadAnimation({ frames, interval })
-			socket.emit('message', 'Upload successful')
+		socket.on('loadAnimation', async ({ id, frames, interval }) => {
+			const animation = await convert.loadAnimation({ id, frames, interval })
+			if (animation.error) socket.emit('message', animation.error)
+			else socket.emit('displayAnimation', animation)
 		})
 
 		socket.on('saveAnimation', async (animation) => {
@@ -29,10 +30,6 @@
 		socket.on('reqAnimationNames', async () => {
 			const names = await convert.frameDB.getAllAnimationNames()
 			socket.emit('resAnimationNames', names)
-		})
-
-		socket.on('loadSavedAnimation', async (id) => {
-			await convert.loadAnimation({ id })
 		})
 	})
 

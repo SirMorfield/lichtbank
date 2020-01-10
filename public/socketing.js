@@ -1,8 +1,6 @@
 const socket = io()
 
-socket.on('message', (message) => {
-	document.getElementById('console').innerHTML += `$ ${message}<br>`
-})
+socket.on('message', printf)
 
 let animationSelect = document.getElementById('loadSavedAnimationSelect')
 socket.on('resAnimationNames', (names) => {
@@ -18,7 +16,7 @@ socket.emit('reqAnimationNames')
 
 function loadSavedAnimation() {
 	let value = animationSelect.options[animationSelect.selectedIndex].value
-	socket.emit('loadSavedAnimation', value)
+	socket.emit('loadAnimation', { id: value })
 }
 
 function saveAnimation() {
@@ -29,6 +27,8 @@ function saveAnimation() {
 	})
 	socket.emit('reqAnimationNames')
 }
+
+socket.on('displayAnimation', playAnimation)
 
 function loadAnimation() {
 	socket.emit('loadAnimation', {

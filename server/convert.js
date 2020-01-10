@@ -8,9 +8,7 @@ module.exports = async () => {
 	const isPi = require('detect-rpi')()
 	let writeToArduino
 	if (!isPi) {
-		writeToArduino = new Promise((resolve) => {
-			setTimeout(resolve, uploadDuration)
-		})
+		writeToArduino = async () => { }
 	} else {
 		writeToArduino = require('./writeToArduino.js')
 	}
@@ -103,10 +101,16 @@ module.exports = async () => {
 
 	let animationTimeout
 	async function loadAnimation({ id, frames, serializedFrames, interval = 0, private = false, framePos = 0 }) {
+		// requires either id, frames, or serializedFrames
+		// case id: 1. retrieve animation from db 2. serialize 3. upload
+		// case frames 1. serialize 2. upload
+		// case serializedFra,es 1. upload
+
 		if (animationTimeout) clearTimeout(animationTimeout)
 
+		let animation
 		if (id) {
-			let animation = await frameDB.getAnimation(id, private)
+			animation = await frameDB.getAnimation(id, private)
 			frames = animation.frames
 			interval = animation.interval
 		}
@@ -120,8 +124,10 @@ module.exports = async () => {
 			if (++framePos > serializedFrames.length - 1) framePos = 0
 			animationTimeout = setTimeout(() => {
 				loadAnimation({ serializedFrames, interval, framePos })
-			}, Math.max(0, interval - uploadDuration / 2));
+			}, Math.max(0, interval - uploadDuration / 2))
 		}
+
+		return animation
 	}
 
 	return {

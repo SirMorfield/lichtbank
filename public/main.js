@@ -76,24 +76,32 @@ function getFrameInterval() {
 
 function showOtherFrame(direction) {
 	let newFrame = currentFrame + direction
-	if (newFrame > frames.length - 1) return
-	if (newFrame < 0) return
+	if (newFrame > frames.length - 1) newFrame = 0
+	if (newFrame < 0) newFrame = frames.length - 1
 	currentFrame = newFrame
 
 	printFrame = {
 		print: true,
-		color,
+		color: colors.red,
 		index: newFrame
 	}
 }
 
 let animationInterval
-function playAnimation() {
+function playAnimation(animation) {
+	let interval
+	if (animation) {
+		frames = animation.frames
+		currentFrame = 0
+		interval = animation.interval
+		printf(`Showing "${animation.name}"`)
+	}
+	else interval = getFrameInterval()
+
 	if (animationInterval) clearInterval(animationInterval)
-	showOtherFrame(currentFrame + 1 % frames.length)
-	let interval = getFrameInterval()
+	showOtherFrame(1)
 	animationInterval = setInterval(() => {
-		showOtherFrame(currentFrame + 1 % frames.length, colors.red)
+		showOtherFrame(1)
 	}, interval)
 }
 
@@ -110,6 +118,10 @@ function makeNewFrame() {
 	}
 	currentFrame++
 	document.getElementById('numberFrames').innerHTML = `Frame: ${currentFrame + 1} / ${frames.length}`
+}
+
+function printf(str) {
+	document.getElementById('console').innerHTML += `$ ${str}<br>`
 }
 
 function setup() {

@@ -5,10 +5,13 @@ const publicPath = path.join(mainPath, 'public/')
 const sanitize = require("sanitize-filename");
 
 async function getAnimation(name, private) {
-	let file = await fs.readFile(path.join(private ? mainPath : publicPath, name))
-	file = file.toString()
-	file = JSON.parse(file)
-	return file
+	try {
+
+		let file = await fs.readFile(path.join(private ? mainPath : publicPath, name))
+		file = file.toString()
+		file = JSON.parse(file)
+		return file
+	} catch (err) { return { error: err } }
 }
 
 async function getAllAnimationNames() {
@@ -20,7 +23,7 @@ async function saveAnimation(animation) {
 	if (name.length < 2) return 'Choose longer name'
 	if (name.length > 30) return 'Choose shorter name'
 
-	name = sanitize(name)
+	name = sanitize(name) || `${Date.now()}`
 
 	const existingNames = await getAllAnimationNames()
 	if (existingNames.indexOf(name) !== -1) return 'Name already in use, try another'
