@@ -6,10 +6,10 @@ const sanitize = require("sanitize-filename");
 
 async function getAnimation(name, private) {
 	try {
-
 		let file = await fs.readFile(path.join(private ? mainPath : publicPath, name))
 		file = file.toString()
 		file = JSON.parse(file)
+		file.error = undefined
 		return file
 	} catch (err) { return { error: err } }
 }

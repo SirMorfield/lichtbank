@@ -31,6 +31,7 @@ let isWriting = false
 class Writer extends EventEmitter { }
 const writer = new Writer()
 writer.setMaxListeners(30)
+let fails = 0
 
 async function writeToArduino(bytes) {
 	if (isWriting) {
@@ -38,6 +39,7 @@ async function writeToArduino(bytes) {
 		await new Promise((resolve) => writer.on('writeDone', resolve))
 		return await write(bytes)
 	}
+	fails = 0
 	isWriting = true
 	try {
 		if (!Arduino) Arduino = await i2c.openPromisified(1)
@@ -50,7 +52,11 @@ async function writeToArduino(bytes) {
 	// await new Promise((resolve) => setTimeout(resolve, 0.001))
 
 	for (const byte of bytes) {
-		await writeByte(byte)
+		const exit = await writeByte(byte)
+		if (exit.error && fails++ < 4) {
+			isWriting = false
+			await writeToArduino(bytes)
+		}
 	}
 
 	isWriting = false
