@@ -6,12 +6,7 @@ module.exports = async () => {
 	const frameDB = require('./frameDB.js')
 
 	const isPi = require('detect-rpi')()
-	let writeToArduino
-	if (!isPi) {
-		writeToArduino = async () => { }
-	} else {
-		writeToArduino = require('./writeToArduino.js')
-	}
+	const writeToArduino = isPi ? require('./writeToArduino.js') : async () => { }
 
 	function serializeFrame(frame) {
 		let bitArray = []
@@ -52,6 +47,11 @@ module.exports = async () => {
 		return byteArray
 	}
 
+	function clearPendingUploads() {
+		if (writeTimeTimeout) clearTimeout(writeTimeTimeout)
+		if (animationTimeout) clearTimeout(animationTimeout)
+	}
+
 	function stringToFrame(string) {
 		function splitInChunks(str, len) {
 			const size = Math.ceil(str.length / len)
@@ -85,7 +85,7 @@ module.exports = async () => {
 
 	let writeTimeTimeout
 	async function writeTime(loop = false, timeStamp = Date.now()) {
-		if (writeTimeTimeout) clearTimeout(writeTimeTimeout)
+		clearPendingUploads()
 
 		const d = new Date(timeStamp)
 		let minsIntoDay = ((d.getHours() + 1) * 60) + d.getMinutes()
@@ -106,8 +106,7 @@ module.exports = async () => {
 		// case frames 1. serialize 2. upload
 		// case serializedFra,es 1. upload
 
-		if (animationTimeout) clearTimeout(animationTimeout)
-
+		clearPendingUploads()
 		let animation
 		if (id) {
 			animation = await frameDB.getAnimation(id, private)
