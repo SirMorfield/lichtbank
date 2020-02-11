@@ -31,6 +31,11 @@
 			const names = await convert.frameDB.getAllAnimationNames()
 			socket.emit('resAnimationNames', names)
 		})
+
+		socket.on('writeTime', async () => {
+			await convert.writeTime()
+			socket.emit('message', 'Started clock')
+		})
 	})
 
 	http.listen(8080, () => {

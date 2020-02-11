@@ -36,3 +36,7 @@ function loadAnimation() {
 		interval: getFrameInterval()
 	})
 }
+
+function writeTime() {
+	socket.emit('writeTime')
+}
