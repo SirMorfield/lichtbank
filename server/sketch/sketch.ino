@@ -2,8 +2,8 @@
 #include <Wire.h>
 #define address 0x04
 
-#define frameLength 336
-#define maxBytesShifted 42 // 7 * (yPix /8)
+#define frameLength 504
+#define maxBytesShifted 63  // 7 * (yPix /8)
 
 #define clockPin A0 // clock   SH_CP   geel
 #define latchPin A1 // latch   ST_CP   paars
@@ -71,7 +71,7 @@ void loop()
     {
       bytesShifted = 0;
       PORTC = B00000000; // digitalWrite(latchPin, LOW);
-      delayMicroseconds(9);
+      delayMicroseconds(15);
       PORTC = B00000010; // digitalWrite(latchPin, HIGH);
     }
   }

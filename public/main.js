@@ -1,5 +1,5 @@
 const Xpix = 48
-const Ypix = 48
+const Ypix = 72
 
 const scale = 18 // only natural numbers
 const xSize = Xpix * scale

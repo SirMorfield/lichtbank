@@ -1,5 +1,5 @@
 module.exports = async () => {
-	const Ypix = 48
+	let Ypix = 72
 	const Xpix = 48
 	const uploadDuration = 300
 
@@ -71,7 +71,6 @@ module.exports = async () => {
 			row = row.map(bit => {
 				if (bit === '1') return 1
 				if (bit === '0') return 0
-				console.error('err', bit)
 			})
 			return row
 		})
@@ -79,9 +78,9 @@ module.exports = async () => {
 	}
 
 	let clock = await frameDB.getClock()
-	let analogs = clock.analogs.split('\n')
-	analogs = analogs.map(stringToFrame)
-	analogs = analogs.map(serializeFrame)
+	// let analogs = clock.analogs.split('\n')
+	// analogs = analogs.map(stringToFrame)
+	// analogs = analogs.map(serializeFrame)
 
 	let writeTimeTimeout
 	async function writeTime(loop = false, timeStamp = Date.now()) {
