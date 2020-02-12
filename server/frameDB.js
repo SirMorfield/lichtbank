@@ -20,7 +20,7 @@ async function getAllAnimationNames() {
 
 async function saveAnimation(animation) {
 	let name = animation.name
-	if (name.length < 2) return 'Choose longer name'
+	if (name.length == 0) return 'Choose longer name'
 	if (name.length > 30) return 'Choose shorter name'
 
 	name = sanitize(name) || `${Date.now()}`

@@ -18,8 +18,7 @@
 	io.on('connection', (socket) => {
 		socket.on('loadAnimation', async ({ id, frames, interval }) => {
 			const animation = await convert.loadAnimation({ id, frames, interval })
-			if (animation.error) socket.emit('message', animation.error)
-			else socket.emit('displayAnimation', animation)
+			socket.emit('displayAnimation', animation)
 		})
 
 		socket.on('saveAnimation', async (animation) => {
@@ -38,7 +37,9 @@
 		})
 	})
 
-	http.listen(8080, () => {
+	const port = process.env.NODE_ENV == 'production' ? 80 : 8080
+	http.listen(port, () => {
 		console.timeEnd('loadTime')
+		console.log(`http://localhost:${port}`)
 	})
 })()
