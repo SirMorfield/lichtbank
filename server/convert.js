@@ -47,6 +47,8 @@ module.exports = async () => {
 		return byteArray
 	}
 
+	let animationTimeout
+	let writeTimeTimeout
 	function clearPendingUploads() {
 		if (writeTimeTimeout) clearTimeout(writeTimeTimeout)
 		if (animationTimeout) clearTimeout(animationTimeout)
@@ -77,28 +79,10 @@ module.exports = async () => {
 		return frame
 	}
 
-	let clock = await frameDB.getClock()
-	// let analogs = clock.analogs.split('\n')
-	// analogs = analogs.map(stringToFrame)
-	// analogs = analogs.map(serializeFrame)
+	function writeTime() {
 
-	let writeTimeTimeout
-	async function writeTime(loop = false, timeStamp = Date.now()) {
-		clearPendingUploads()
-
-		const d = new Date(timeStamp)
-		let minsIntoDay = ((d.getHours() + 1) * 60) + d.getMinutes()
-		let index = minsIntoDay % 720
-		await writeToArduino(analogs[index])
-
-		if (loop) {
-			writeTimeTimeout = setTimeout(() => {
-				writeTime(true)
-			}, Math.max(0, 10000 - uploadDuration / 2))
-		}
 	}
-
-	let animationTimeout
+	writeTime();
 	async function loadAnimation({ id, frames, serializedFrames, interval = 0, private = false, framePos = 0 }) {
 		// requires either id, frames, or serializedFrames
 		// case id: 1. retrieve animation from db 2. serialize 3. upload

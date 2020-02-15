@@ -35,12 +35,12 @@ async function saveAnimation(animation) {
 }
 
 async function getClock() {
-	let analogs = await fs.readFile(path.join(mainPath, 'clock/analog'))
-	analogs = analogs.toString()
-
-	return {
-		analogs
+	let res = {}
+	for (const time of ['analogs', 'hours', 'minutes', 'seconds']) {
+		const file = await fs.readFile(path.join(mainPath, `clock/${time}`))
+		res[time] = file.toString().split('\n')
 	}
+	return res
 }
 
 module.exports = {
