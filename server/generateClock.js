@@ -16,34 +16,11 @@
 	const clock = await frameDB.getClock()
 	const Xpix = 48
 
-	function map(x, in_min, in_max, out_min, out_max) {
-		return Math.round((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min)
+	function map(x, inMin, inMax, outMin, outMax) {
+		return Math.round((x - inMin) * (outMax - outMin) / (inMax - inMin) + outMin)
 	}
 
-	function stringToFrame(string) {
-		function splitInChunks(str, len) {
-			const size = Math.ceil(str.length / len)
-			const r = Array(size)
-			let offset = 0
 
-			for (let i = 0; i < size; i++) {
-				r[i] = str.substr(offset, len)
-				offset += len
-			}
-			return r
-		}
-
-		let frame = splitInChunks(string, Xpix)
-		frame = frame.map((row) => {
-			row = row.split('')
-			row = row.map(bit => {
-				if (bit === '1') return 1
-				if (bit === '0') return 0
-			})
-			return row
-		})
-		return frame
-	}
 
 	let seconds = 0
 	let minutes = 0

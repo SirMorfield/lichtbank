@@ -54,10 +54,6 @@ module.exports = async () => {
 		if (animationTimeout) clearTimeout(animationTimeout)
 	}
 
-	function writeTime() {
-
-	}
-	writeTime();
 	async function loadAnimation({ id, frames, serializedFrames, interval = 0, private = false, framePos = 0 }) {
 		// requires either id, frames, or serializedFrames
 		// case id: 1. retrieve animation from db 2. serialize 3. upload
@@ -90,7 +86,6 @@ module.exports = async () => {
 	return {
 		frameDB,
 		writeToArduino,
-		writeTime,
 		loadAnimation,
 		serializeFrame,
 	}

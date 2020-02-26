@@ -52,7 +52,7 @@ async function writeToArduino(bytes, fails = 0) {
 
 	for (const byte of bytes) {
 		const exit = await writeByte(byte)
-		if (exit.error && fails++ < 4) {
+		if (exit.error && fails++ < 10) {
 			isWriting = false
 			await writeToArduino(bytes, fails)
 			return
