@@ -5,7 +5,7 @@ const convert = require('./convert.js');
 	while (true) {
 		timestamp += 60000
 		// console.time('write')
-		await convert.writeTimeFrame(timestamp)
+		await convert.writeTime(false, timestamp)
 		// console.timeEnd('write')
 		await new Promise((resolve) => setTimeout(resolve, 300))
 	}

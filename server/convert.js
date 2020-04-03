@@ -1,92 +1,55 @@
-module.exports = async () => {
-	let Ypix = 72
-	const Xpix = 48
-	const uploadDuration = 300
+const Ypix = 72
+const Xpix = 48
+const serializeFrame = require('./serializeFrame.js')
+const uploadDuration = 300
+const frameDB = require('./frameDB.js')
+const isPi = require('detect-rpi')()
+const writeToArduino = isPi ? require('./writeToPython.js') : () => { }
+const getTimeFrame = require('./clock/getTimeFrame.js')
 
-	const frameDB = require('./frameDB.js')
+let animationTimeout
+async function loadAnimation({ id, frames, serializedFrames, interval = 0, private = false, framePos = 0 }) {
+	// requires either id, frames, or serializedFrames
+	// case id: 1. retrieve animation from db 2. serialize 3. upload
+	// case frames 1. serialize 2. upload
+	// case serializedFra,es 1. upload
 
-	const isPi = require('detect-rpi')()
-	const writeToArduino = isPi ? require('./writeToArduino.js') : async () => { }
-
-	function serializeFrame(frame) {
-		let bitArray = []
-		for (let column = 0; column < 8; column++) {
-			for (let panel = Ypix / 8 - 1; panel >= 0; panel--) {
-				if (panel % 2 == 1) {
-					for (let block = 0; block < 6; block++) {
-						for (let y = 0; y < 8; y++) {
-							let x = (7 - column) + (block * 8)
-							bitArray.push(frame[y + (panel * 8)][x])
-						}
-					}
-				} else {
-					for (let block = 0; block < 6; block++) {
-						for (let y = 7; y >= 0; y--) {
-							let x = Xpix - 1 - (7 - column) - (block * 8)
-							bitArray.push(frame[y + (panel * 8)][x])
-						}
-					}
-				}
-				for (let i = 0; i < 8; i++) {
-					if (i == column) bitArray.push(0)
-					else bitArray.push(1)
-				}
-			}
-		}
-
-		let byteArray = [];
-		for (let i = 0; i < bitArray.length; i += 8) {
-			let byte = ''
-			for (let bit = 0; bit < 8; bit++) {
-				byte += String(bitArray[bit + i])
-			}
-			byte = parseInt(byte, 2)
-			byteArray.push(byte)
-		}
-
-		return byteArray
+	clearTimeout(animationTimeout)
+	let animation
+	if (id) {
+		animation = await frameDB.getAnimation(id, private)
+		frames = animation.frames
+		interval = animation.interval
+	}
+	if (frames) {
+		serializedFrames = frames.map((frame) => serializeFrame(frame, Xpix, Ypix))
 	}
 
-	let animationTimeout
-	let writeTimeTimeout
-	function clearPendingUploads() {
-		if (writeTimeTimeout) clearTimeout(writeTimeTimeout)
-		if (animationTimeout) clearTimeout(animationTimeout)
+	writeToArduino(serializedFrames[framePos])
+
+	if (serializedFrames.length > 1) {
+		if (++framePos > serializedFrames.length - 1) framePos = 0
+		animationTimeout = setTimeout(() => {
+			loadAnimation({ serializedFrames, interval, framePos })
+		}, Math.max(10, interval - uploadDuration / 2))
 	}
 
-	async function loadAnimation({ id, frames, serializedFrames, interval = 0, private = false, framePos = 0 }) {
-		// requires either id, frames, or serializedFrames
-		// case id: 1. retrieve animation from db 2. serialize 3. upload
-		// case frames 1. serialize 2. upload
-		// case serializedFra,es 1. upload
+	return animation
+}
 
-		clearPendingUploads()
-		let animation
-		if (id) {
-			animation = await frameDB.getAnimation(id, private)
-			frames = animation.frames
-			interval = animation.interval
-		}
-		if (frames) {
-			serializedFrames = frames.map(serializeFrame)
-		}
+let timeout
+function writeTime(loop = false, timestamp = Date.now()) {
+	if (timeout) clearTimeout(timeout)
+	const frame = getTimeFrame(timestamp)
+	const bytes = serializeFrame(frame)
+	writeToArduino(bytes)
+	if (loop) timeout = setTimeout(() => writeTime(loop), 5000)
+}
 
-		await writeToArduino(serializedFrames[framePos])
-
-		if (serializedFrames.length > 1) {
-			if (++framePos > serializedFrames.length - 1) framePos = 0
-			animationTimeout = setTimeout(() => {
-				loadAnimation({ serializedFrames, interval, framePos })
-			}, Math.max(0, interval - uploadDuration / 2))
-		}
-
-		return animation
-	}
-
-	return {
-		frameDB,
-		writeToArduino,
-		loadAnimation,
-		serializeFrame,
-	}
+module.exports = {
+	frameDB,
+	writeToArduino,
+	loadAnimation,
+	serializeFrame,
+	writeTime
 }

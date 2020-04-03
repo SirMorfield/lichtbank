@@ -7,8 +7,7 @@
 	const io = require('socket.io')(http)
 	process.env.root = __dirname
 
-	const convert = await require('./server/convert.js')()
-	await convert.loadAnimation({ id: 'standard', private: true })
+	const convert = require('./server/convert.js')
 
 	app.use(express.static(path.join(__dirname, 'public/')))
 	app.get('/', (req, res) => {

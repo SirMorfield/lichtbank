@@ -17,22 +17,15 @@ module.exports = async (convert) => {
 		yOffset: 49,
 
 		getNumbers(hour, minute, second) {
-			let res = []
-			hour = `${hour}`.padStart(2, '0')
-			res[0] = hour[0]
-			res[1] = hour[1]
-
-			minute = `${minute}`.padStart(2, '0')
-			res[2] = minute[0]
-			res[3] = minute[1]
-
-			second = `${second}`.padStart(2, '0')
-			res[4] = second[0]
-			res[5] = second[1]
-
-			res = res.map(num => parseInt(num))
+			let res = [
+				parseInt(('' + hour)[0]),
+				hour % 10,
+				parseInt(('' + minute)[0]),
+				minute % 10,
+				parseInt(('' + second)[0]),
+				second % 10,
+			]
 			res = res.map(num => numbersArr[num])
-
 			return res
 		},
 
@@ -42,14 +35,14 @@ module.exports = async (convert) => {
 				canvas.push(new Array(Xpix).fill(0))
 			}
 
-			const numbers = digitalLayer.getNumbers(hour, minute, second)
+			const numbers = this.getNumbers(hour, minute, second)
 
 			for (let i = 0; i < numbers.length; i++) {
 				let number = numbers[i]
-				let xOffset = digitalLayer.xOffsets[i]
+				let xOffset = this.xOffsets[i]
 				for (let y = 0; y < number.length; y++) {
 					for (let x = 0; x < number[y].length; x++) {
-						canvas[digitalLayer.yOffset + y][xOffset + x] = number[y][x]
+						canvas[this.yOffset + y][xOffset + x] = number[y][x]
 					}
 				}
 			}
@@ -67,7 +60,7 @@ module.exports = async (convert) => {
 
 		getAnalogLayer(hour, minute, second) {
 			const totalSeconds = (hour * 60 * 60) + (minute * 60) + second
-			const row = analogLayer.map(totalSeconds, 0, analogLayer.maxSeconds, 0, 720 * 2) % 720
+			const row = this.map(totalSeconds, 0, this.maxSeconds, 0, 720 * 2) % 720
 			return analogs[row]
 		},
 	}
@@ -86,7 +79,7 @@ module.exports = async (convert) => {
 		},
 
 		stringToFrame(string) {
-			let frame = layersToBytes.splitInChunks(string, Xpix)
+			let frame = this.splitInChunks(string, Xpix)
 			frame = frame.map((row) => {
 				row = row.split('')
 				row = row.map(bit => {
@@ -110,32 +103,20 @@ module.exports = async (convert) => {
 			return pixels
 		},
 
-		getBytes(timestamp) {
-
-			const d = new Date(timestamp)
-			const hour = d.getHours()
-			const minute = d.getMinutes()
-			const second = Math.round(d.getSeconds() + 1e-3 * d.getMilliseconds())
-
-			const layers = [
-				analogLayer.getAnalogLayer(hour, minute, second),
-				digitalLayer.getDigitalLayer(hour, minute, second),
-			]
-			const frame = layersToBytes.mergeLayersToFrame(layers)
-			const bytes = convert.serializeFrame(frame)
-			return bytes
-		},
 	}
 
-	let timeout
-	async function writeTime() {
-		if (timeout) clearTimeout(timeout)
-		console.time('getBytes')
-		const bytes = layersToBytes.getBytes(Date.now())
-		console.timeEnd('getBytes')
-		await convert.writeToArduino(bytes)
-		timeout = setTimeout(writeTime, 5000)
-	}
+	function getFrame(timestamp) {
+		const d = new Date(timestamp)
+		const hour = d.getHours()
+		const minute = d.getMinutes()
+		const second = Math.round(d.getSeconds() + 1e-3 * d.getMilliseconds())
 
-	return writeTime
+		const layers = [
+			analogLayer.getAnalogLayer(hour, minute, second),
+			digitalLayer.getDigitalLayer(hour, minute, second),
+		]
+		const frame = layersToBytes.mergeLayersToFrame(layers)
+		return bytes
+	}
+	return getFrame
 }
