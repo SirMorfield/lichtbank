@@ -43,6 +43,7 @@ class Server(BaseHTTPRequestHandler):
 		break
 
 	  elif exitcode == 1:
+		print 'fail'
 		errorCounter += 1
 		if errorCounter > 10:
 		  print "upload failed 10 times PANIC NOW"

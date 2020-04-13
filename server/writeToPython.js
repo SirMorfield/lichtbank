@@ -1,7 +1,7 @@
 const spawn = require('child_process').spawn
 const python = spawn('python', ['-u', 'i2c.py'], { cwd: __dirname })
-python.stdout.on('data', (data) => { if (data.toString().length > 0) console.log(data.toString()) })
-python.stderr.on('data', (data) => { if (data.toString().length > 0) console.error(data.toString()) })
+python.stdout.on('data', (data) => console.log(data.toString().replace(/\n/g, '')))
+python.stderr.on('data', (data) => console.error(data.toString().replace(/\n/g, '')))
 process.on('exit', () => python.kill())
 
 const request = require('request-promise-native')

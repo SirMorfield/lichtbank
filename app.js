@@ -39,6 +39,5 @@
 	const port = process.env.NODE_ENV == 'production' ? 80 : 8080
 	http.listen(port, () => {
 		console.timeEnd('loadTime')
-		console.log(`http://localhost:${port}`)
 	})
 })()
