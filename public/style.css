@@ -157,3 +157,11 @@ body {
 	height: 90%;
 	width: 80px;
 }
+
+#writeTime {
+	height: 45px;
+}
+
+#stopWriteTime {
+	height: 45px;
+}

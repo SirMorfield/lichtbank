@@ -6,6 +6,7 @@ process.on('exit', () => python.kill())
 
 const request = require('request-promise-native')
 async function writeToPython(bytes) {
+	console.time('writeToPython')
 	const options = {
 		url: 'http://localhost:8081',
 		method: 'POST',
@@ -14,6 +15,7 @@ async function writeToPython(bytes) {
 	}
 	const { err, response, body } = await request(options)
 	if (err) console.error(err)
+	console.timeEnd('writeToPython')
 }
 
 module.exports = writeToPython

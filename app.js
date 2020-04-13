@@ -31,8 +31,13 @@
 		})
 
 		socket.on('writeTime', async () => {
-			await convert.writeTime()
+			await convert.writeTime(true)
 			socket.emit('message', 'Started clock')
+		})
+
+		socket.on('stopWriteTime', async () => {
+			await convert.stopWriteTime(true)
+			socket.emit('message', 'Stopped clock')
 		})
 	})
 

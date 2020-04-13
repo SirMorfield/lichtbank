@@ -40,3 +40,7 @@ function loadAnimation() {
 function writeTime() {
 	socket.emit('writeTime')
 }
+
+function stopWriteTime() {
+	socket.emit('stopWriteTime')
+}
