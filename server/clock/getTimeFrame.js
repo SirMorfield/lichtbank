@@ -15,6 +15,24 @@ const digitalLayer = {
 	xOffsets: [0, 8, 17, 25, 34, 42],
 	yOffset: 49,
 
+	getSeparators() {
+		// let separatorOffset = this.yOffset + 2
+		// return [
+		// 	{ x: 15, y: separatorOffset },
+		// 	{ x: 15, y: separatorOffset + 6 },
+		// 	{ x: 32, y: separatorOffset },
+		// 	{ x: 32, y: separatorOffset + 6 },
+		// ]
+
+		let separatorOffset = this.yOffset + 3
+		return [
+			{ x: 15, y: separatorOffset },
+			{ x: 15, y: separatorOffset + 4 },
+			{ x: 32, y: separatorOffset },
+			{ x: 32, y: separatorOffset + 4 },
+		]
+	},
+
 	getNumbers(hour, minute, second) {
 		let res = [
 			hour < 10 ? 0 : Math.floor(hour / 10),
@@ -44,6 +62,10 @@ const digitalLayer = {
 					canvas[this.yOffset + y][xOffset + x] = number[y][x]
 				}
 			}
+		}
+
+		for (const point of this.getSeparators()) {
+			canvas[point.y][point.x] = 1
 		}
 
 		canvas = canvas.flat(2).join('')
