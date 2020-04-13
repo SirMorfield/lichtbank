@@ -13,7 +13,7 @@ async function writeTime(loop = false, timestamp = Date.now()) {
 	const frame = getTimeFrame(timestamp)
 	const bytes = serializeFrame(frame)
 	await writeToPython(bytes)
-	if (loop) writeTimeTimeout = setTimeout(() => writeTime(loop), Math.max(999, uploadDuration))
+	if (loop) writeTimeTimeout = setTimeout(() => writeTime(loop), Math.max(2000, uploadDuration))
 }
 
 async function stopWriteTime(loadStandardFrame) {

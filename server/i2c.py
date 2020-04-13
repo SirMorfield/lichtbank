@@ -23,39 +23,36 @@ def upload(i2cBytes):
 		return 1
 
 class Server(BaseHTTPRequestHandler):
-  def _set_headers(self):
-	self.send_response(200)
-	self.send_header('Content-type', 'application/json')
-	self.end_headers()
+	def _set_headers(self):
+		self.send_response(200)
+		self.send_header('Content-type', 'application/json')
+		self.end_headers()
 
-  def log_message(self, format, *args):
-	return
+	def log_message(self, format, *args):
+		return
 
-  def do_POST(self):
-	length = int(self.headers.getheader('content-length'))
-	message = json.loads(self.rfile.read(length))
+	def do_POST(self):
+		length = int(self.headers.getheader('content-length'))
+		message = json.loads(self.rfile.read(length))
 
-	errorCounter = 0
-	while True:
-	  exitcode = upload(message)
+		errorCounter = 0
+		while True:
+			exitcode = upload(message)
+			if exitcode == 0:
+				break
 
-	  if exitcode == 0:
-		break
-
-	  elif exitcode == 1:
-		print 'fail'
-		errorCounter += 1
-		if errorCounter > 10:
-		  print "upload failed 10 times PANIC NOW"
-		  break
-	self._set_headers()
+			elif exitcode == 1:
+				errorCounter += 1
+			if errorCounter > 10:
+				print "upload failed 10 times PANIC NOW"
+				break
+		self._set_headers()
 
 def run(server_class=HTTPServer, handler_class=Server, port=8081):
-  server_address = ('', port)
-  httpd = server_class(server_address, handler_class)
-
-  httpd.serve_forever()
+	server_address = ('', port)
+	httpd = server_class(server_address, handler_class)
+	httpd.serve_forever()
 
 if __name__ == "__main__":
-  print 'running python'
-  run()
+	print 'running python'
+	run()
