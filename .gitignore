@@ -4,4 +4,5 @@ temp.json
 temp.js
 .vscode/
 build-uno/
-server/frames/public/
+obj/
+a.out
