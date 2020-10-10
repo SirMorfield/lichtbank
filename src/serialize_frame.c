@@ -6,14 +6,14 @@
 /*   By: joppe <joppe@student.codam.nl>               +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/10/10 01:58:33 by joppe         #+#    #+#                 */
-/*   Updated: 2020/10/10 18:12:05 by joppe         ########   odam.nl         */
+/*   Updated: 2020/10/10 21:49:03 by joppe         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <stdbool.h>
+#include <stdint.h>
 #include "constans.h"
 #include "serialize_frame.h"
-#include <stdint.h>
-#include <stdbool.h>
 #include <stdio.h>
 
 void	serialize_frame(bool **frame, uint8_t *serialized_frame) {

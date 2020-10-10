@@ -1,3 +1,17 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        ::::::::            */
+/*   i2c.c                                              :+:    :+:            */
+/*                                                     +:+                    */
+/*   By: joppe <joppe@student.codam.nl>               +#+                     */
+/*                                                   +#+                      */
+/*   Created: 2020/10/10 21:11:59 by joppe         #+#    #+#                 */
+/*   Updated: 2020/10/10 21:48:29 by joppe         ########   odam.nl         */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include <stdbool.h>
+#include <stdint.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
@@ -5,16 +19,14 @@
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
-#include <stdint.h>
-#include <stdbool.h>
 
 #include "i2c.h"
 
-int	open_i2c(int addr)
+int32_t	open_i2c(int32_t addr)
 {
-	int fd;
-	char *filename = "/dev/i2c-1";
-	fd = open(filename, O_RDWR);
+	int32_t fd;
+
+	fd = open("/dev/i2c-1", O_RDWR);
 	if (fd < 0)
 	{
 		printf("Failed to open the i2c bus");
@@ -28,11 +40,20 @@ int	open_i2c(int addr)
 	return (fd);
 }
 
-void	write_bytes(int fd, uint8_t *bytes, uint64_t len)
+void	write_bytes(int32_t fd, uint8_t *bytes, uint64_t len)
 {
 	if (write(fd, bytes, len) != (int)len)
 	{
 		printf("Failed to write to the i2c bus.\n");
+		printf("%s\n", strerror(errno));
+	}
+}
+
+void	read_bytes(int32_t fd, uint8_t *buf, uint64_t n)
+{
+	if (read(fd, buf, n) != (int)n)
+	{
+		printf("Failed to read from the i2c bus.\n");
 		printf("%s\n", strerror(errno));
 	}
 }
