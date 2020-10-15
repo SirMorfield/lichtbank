@@ -6,7 +6,7 @@
 /*   By: joppe <joppe@student.codam.nl>               +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/10/10 15:03:18 by joppe         #+#    #+#                 */
-/*   Updated: 2020/10/10 21:48:45 by joppe         ########   odam.nl         */
+/*   Updated: 2020/10/16 01:40:35 by joppe         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,8 @@
 #include "i2c.h"
 #include "constans.h"
 #include "frame_helpers.h"
-
+// #include "gpio.h"
+#include <wiringPi.h>
 
 bool	**alloc_matrix(uint64_t x_size, uint64_t y_size)
 {
@@ -37,10 +38,12 @@ bool	**alloc_matrix(uint64_t x_size, uint64_t y_size)
 
 int	main(void)
 {
-	int32_t fd = open_i2c(0x04);
+	int32_t fd = open_i2c(SLAVE_ADDR);
+	// if (wiringPiSetup () == -1)
+    // 	return 1;
+	// pinMode(RESET_PIN, OUTPUT);
 	bool **frame = alloc_matrix(X_SIZE, Y_SIZE);
 	uint8_t *serialized_frame = malloc(NUM_SERIALIZED_BYTES * sizeof(uint8_t));
-
 	read_frame("standard_frame", frame);
 	write_frame(fd, frame, serialized_frame);
 

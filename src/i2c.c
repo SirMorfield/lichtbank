@@ -6,7 +6,7 @@
 /*   By: joppe <joppe@student.codam.nl>               +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2020/10/10 21:11:59 by joppe         #+#    #+#                 */
-/*   Updated: 2020/10/10 21:48:29 by joppe         ########   odam.nl         */
+/*   Updated: 2020/10/16 01:37:37 by joppe         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,11 +16,10 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <linux/i2c-dev.h>
-#include <stdio.h>
-#include <errno.h>
-#include <string.h>
+#include <stdlib.h>
 
 #include "i2c.h"
+#include "exit_error.h"
 
 int32_t	open_i2c(int32_t addr)
 {
@@ -29,31 +28,31 @@ int32_t	open_i2c(int32_t addr)
 	fd = open("/dev/i2c-1", O_RDWR);
 	if (fd < 0)
 	{
-		printf("Failed to open the i2c bus");
+		exit_error("Failed to open the i2c bus");
 		return (-1);
 	}
 	if (ioctl(fd, I2C_SLAVE, addr) < 0)
 	{
-		printf("Failed to acquire bus access and/or talk to slave.\n");
-		return (-1);
+		close(fd);
+		exit_error("Failed to acquire bus access and/or talk to slave.\n");
 	}
 	return (fd);
 }
 
 void	write_bytes(int32_t fd, uint8_t *bytes, uint64_t len)
 {
-	if (write(fd, bytes, len) != (int)len)
+	if (write(fd, bytes, len) != (ssize_t)len)
 	{
-		printf("Failed to write to the i2c bus.\n");
-		printf("%s\n", strerror(errno));
+		close(fd);
+		exit_error("Failed to write to the i2c bus.\n");
 	}
 }
 
 void	read_bytes(int32_t fd, uint8_t *buf, uint64_t n)
 {
-	if (read(fd, buf, n) != (int)n)
+	if (read(fd, buf, n) != (ssize_t)n)
 	{
-		printf("Failed to read from the i2c bus.\n");
-		printf("%s\n", strerror(errno));
+		close(fd);
+		exit_error("Failed to read from the i2c bus.\n");
 	}
 }

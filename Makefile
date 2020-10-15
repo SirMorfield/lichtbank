@@ -6,7 +6,7 @@
 #    By: joppe <joppe@student.codam.nl>               +#+                      #
 #                                                    +#+                       #
 #    Created: 2020/08/23 17:53:14 by joppe         #+#    #+#                  #
-#    Updated: 2020/10/10 18:02:07 by joppe         ########   odam.nl          #
+#    Updated: 2020/10/16 01:45:48 by joppe         ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,6 +21,7 @@ SRCDIR      := src
 BUILDDIR    := obj
 SRCEXT      := c
 OBJEXT      := o
+LIBS		:= -lwiringPi
 
 SOURCES     := $(shell find $(SRCDIR) -type f -name '*.$(SRCEXT)')
 OBJECTS     := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.$(OBJEXT)))
@@ -28,7 +29,7 @@ OBJECTS     := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.$(OBJE
 $(NAME): all
 
 all: directories $(OBJECTS)
-	$(CC) $(CFLAGS) -I ${HEADERDIR}/ $(OBJECTS) -o $(NAME)
+	$(CC) $(CFLAGS) ${LIBS} -I ${HEADERDIR}/ $(OBJECTS) -o $(NAME)
 
 clean:
 	/bin/rm -rf $(BUILDDIR)/*
@@ -40,6 +41,7 @@ re: fclean all
 
 directories:
 	@mkdir -p $(BUILDDIR)
-# @echo "Compiling: $< -> $@"
 $(BUILDDIR)/%.$(OBJEXT): $(SRCDIR)/%.$(SRCEXT)
 	$(CC) $(CFLAGS) -I ${HEADERDIR}/ -c $< -o $@
+
+.PHONY: all clean fclean re directories
